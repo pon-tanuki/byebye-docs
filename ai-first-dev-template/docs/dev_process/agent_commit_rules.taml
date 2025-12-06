@@ -1,0 +1,279 @@
+# AIエージェント コミットルール
+# Format: TAML (Text-based Application Markup Language)
+
+version: "1.0"
+last_updated: "YYYY-MM-DD"
+
+# =============================================================================
+# コミットメッセージ形式
+# =============================================================================
+
+commit_message_format:
+  template: |
+    <type>(<scope>): <subject>
+
+    <body>
+
+    <footer>
+
+  rules:
+    type:
+      required: true
+      allowed_values:
+        - feat      # 新機能
+        - fix       # バグ修正
+        - docs      # ドキュメント
+        - style     # フォーマット（機能影響なし）
+        - refactor  # リファクタリング
+        - test      # テスト
+        - chore     # ビルド・ツール
+        - agent     # AIエージェント固有の変更
+
+    scope:
+      required: false
+      description: "変更対象のモジュール/機能"
+      examples:
+        - auth
+        - api
+        - ui
+        - db
+
+    subject:
+      required: true
+      max_length: 72
+      style: "lowercase, imperative mood"
+      rules:
+        - "先頭は小文字"
+        - "末尾にピリオドなし"
+        - "命令形で記述"
+
+    body:
+      required: false
+      wrap_at: 72
+      content:
+        - "変更の理由"
+        - "変更内容の詳細"
+        - "技術的な決定事項"
+
+    footer:
+      required: true
+      content:
+        - issue_reference: "Closes #<issue-number>"
+        - agent_identifier: "Agent: <agent-id>"
+        - task_reference: "Task: <task-id>"
+        - reviewed_by: "Reviewed-by: <reviewer>"  # 人間レビュー後
+
+# =============================================================================
+# AIエージェント固有のルール
+# =============================================================================
+
+agent_specific_rules:
+
+  # ---------------------------------------------------------------------------
+  # 必須メタデータ
+  # ---------------------------------------------------------------------------
+  required_metadata:
+    - field: agent_id
+      description: "実行したエージェントのID"
+      format: "<role>-<instance>"
+      example: "developer-001"
+
+    - field: task_id
+      description: "関連タスクのID"
+      format: "UUID or issue number"
+
+    - field: generation_context
+      description: "生成コンテキスト"
+      include_in: "commit body"
+      fields:
+        - model_version
+        - prompt_hash
+        - confidence_score
+
+  # ---------------------------------------------------------------------------
+  # コミット粒度
+  # ---------------------------------------------------------------------------
+  commit_granularity:
+    max_files_per_commit: 10
+    max_lines_per_commit: 500
+    exceptions:
+      - type: "generated_code"
+        max_files: 20
+        max_lines: 1000
+        requires: "human_review"
+      - type: "refactor"
+        max_files: 50
+        requires: "test_coverage_maintained"
+
+  # ---------------------------------------------------------------------------
+  # 自動コミット条件
+  # ---------------------------------------------------------------------------
+  auto_commit_conditions:
+    allowed:
+      - condition: "単一ファイルの小規模変更"
+        max_lines: 50
+        requires: ["tests_pass", "lint_pass"]
+
+      - condition: "テストコード追加"
+        requires: ["tests_pass"]
+
+      - condition: "ドキュメント更新"
+        scope: ["*.md", "docs/**"]
+
+    requires_confirmation:
+      - condition: "セキュリティ関連ファイル"
+        scope: ["**/auth/**", "**/security/**", "**/*secret*"]
+
+      - condition: "設定ファイル変更"
+        scope: ["*.config.*", "*.yml", "*.yaml", "*.json"]
+
+      - condition: "依存関係変更"
+        scope: ["package.json", "requirements.txt", "go.mod", "Cargo.toml"]
+
+    forbidden:
+      - condition: "機密情報を含むファイル"
+        scope: [".env", "**/credentials/**", "**/*secret*"]
+        action: "block_and_alert"
+
+# =============================================================================
+# 自動生成コミットのポリシー
+# =============================================================================
+
+auto_generated_commit_policy:
+
+  # ---------------------------------------------------------------------------
+  # タイミング
+  # ---------------------------------------------------------------------------
+  timing:
+    - trigger: "task_completion"
+      action: "commit_all_changes"
+      message_template: "feat(<scope>): complete <task_summary>"
+
+    - trigger: "milestone_reached"
+      action: "commit_with_tag"
+      message_template: "feat(<scope>): reach milestone - <milestone_name>"
+
+    - trigger: "test_fix_iteration"
+      action: "squash_commits"
+      message_template: "fix(<scope>): resolve test failures"
+
+  # ---------------------------------------------------------------------------
+  # スカッシュルール
+  # ---------------------------------------------------------------------------
+  squash_rules:
+    - condition: "同一タスク内の修正コミット"
+      action: "squash_before_pr"
+      preserve: "final_message_only"
+
+    - condition: "レビュー指摘対応"
+      action: "squash_with_original"
+      message_format: "feat(<scope>): <original> (with review fixes)"
+
+  # ---------------------------------------------------------------------------
+  # 署名
+  # ---------------------------------------------------------------------------
+  signing:
+    enabled: true
+    method: "gpg"
+    key_source: "agent_keyring"
+    verification_required: true
+
+  # ---------------------------------------------------------------------------
+  # トレーサビリティ
+  # ---------------------------------------------------------------------------
+  traceability:
+    required_headers:
+      - "X-Agent-ID"
+      - "X-Task-ID"
+      - "X-Model-Version"
+      - "X-Timestamp"
+
+    optional_headers:
+      - "X-Confidence-Score"
+      - "X-Review-Status"
+      - "X-Parent-Commit"
+
+# =============================================================================
+# コミット前チェック
+# =============================================================================
+
+pre_commit_checks:
+  required:
+    - name: "lint"
+      command: "npm run lint"
+      on_failure: "block"
+
+    - name: "format"
+      command: "npm run format:check"
+      on_failure: "auto_fix_and_retry"
+
+    - name: "type_check"
+      command: "npm run type-check"
+      on_failure: "block"
+
+    - name: "unit_tests"
+      command: "npm run test:unit"
+      on_failure: "block"
+
+    - name: "security_scan"
+      command: "npm run security:scan"
+      on_failure: "block"
+
+  optional:
+    - name: "integration_tests"
+      command: "npm run test:integration"
+      on_failure: "warn"
+
+    - name: "coverage_check"
+      command: "npm run coverage"
+      threshold: 80
+      on_failure: "warn"
+
+# =============================================================================
+# コミットメッセージ例
+# =============================================================================
+
+examples:
+  - type: "feature"
+    message: |
+      feat(auth): add OAuth2 login support
+
+      - Implement Google OAuth2 provider
+      - Add callback endpoint handling
+      - Store tokens securely in session
+
+      Closes #123
+      Agent: developer-001
+      Task: 550e8400-e29b-41d4-a716-446655440000
+
+  - type: "bugfix"
+    message: |
+      fix(api): resolve null pointer in user lookup
+
+      The getUserById function was not handling the case where
+      the user does not exist in the database, causing a null
+      pointer exception.
+
+      - Add null check before accessing user properties
+      - Return 404 response for non-existent users
+      - Add unit test for edge case
+
+      Closes #456
+      Agent: developer-001
+      Task: 550e8400-e29b-41d4-a716-446655440001
+
+  - type: "refactor"
+    message: |
+      refactor(db): extract repository pattern
+
+      Separate data access logic from business logic by
+      implementing the repository pattern.
+
+      - Create UserRepository interface
+      - Implement PostgreSQL adapter
+      - Update service layer to use repository
+
+      No functional changes.
+
+      Agent: developer-001
+      Task: 550e8400-e29b-41d4-a716-446655440002
