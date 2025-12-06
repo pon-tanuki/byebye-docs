@@ -64,16 +64,57 @@ ai-first-dev-template/
     └── change_history.md          # 変更履歴
 ```
 
-## 使い方
+## クイックスタート
 
-### 1. テンプレートのコピー
+### 自動セットアップ（推奨）
+
+セットアップスクリプトを使用して、新しいプロジェクトを数秒で開始できます：
 
 ```bash
-cp -r ai-first-dev-template your-project-name
-cd your-project-name
+# curlを使用してダウンロード＆実行
+curl -fsSL https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh | bash -s my-project
+
+# または、スクリプトをダウンロードしてから実行
+curl -O https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh
+chmod +x setup.sh
+./setup.sh my-project
 ```
 
-### 2. プロジェクト情報の更新
+**オプション:**
+```bash
+# Gitリポジトリの初期化をスキップ
+./setup.sh --no-git my-project
+
+# ヘルプを表示
+./setup.sh --help
+```
+
+セットアップスクリプトは以下を自動的に実行します：
+- ✅ ディレクトリ構造の作成
+- ✅ すべてのテンプレートファイルのダウンロード
+- ✅ プロジェクト固有ファイルの生成（.gitignore, .editorconfig等）
+- ✅ Gitリポジトリの初期化（オプション）
+- ✅ 初期コミットの作成
+
+### 手動セットアップ
+
+リポジトリをクローンして使用することもできます：
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git your-project-name
+cd your-project-name
+
+# テンプレートのGit履歴を削除して新規プロジェクトとして開始
+rm -rf .git
+git init
+git add .
+git commit -m "feat: initialize project with AI-first development template"
+```
+
+## 使い方
+
+### 1. プロジェクト情報の更新
 
 以下のファイルをプロジェクトに合わせて更新してください：
 
@@ -82,13 +123,20 @@ cd your-project-name
 3. `docs/architecture/system_overview.md` - システム構成の設計
 4. `generator_instructions/system_prompt.md` - AIエージェントの設定
 
-### 3. AIエージェントへの指示
+### 3. AIエージェント（Claude Code等）の使用
 
-AIエージェントには以下のディレクトリを参照させてください：
+このテンプレートには `CLAUDE.md` が含まれており、Claude Codeやその他のAIアシスタントが自動的に参照します。
 
+**AIエージェントが参照する主要ファイル：**
+- `CLAUDE.md` - AIエージェント向け包括的指示書
 - `generator_instructions/` - 行動規則と制約
 - `docs/agent/` - 役割とツール定義
 - `docs/dev_process/` - 開発規約
+
+**AIエージェントでの開発開始：**
+1. プロジェクトディレクトリで Claude Code を起動
+2. 「機能XXXを実装して」のように指示
+3. AIが自動的にドキュメントを参照し、規約に従ってコード生成
 
 ## AIエージェント向け設計方針
 
