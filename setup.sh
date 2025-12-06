@@ -74,12 +74,10 @@ download_file() {
 
     if command -v curl &> /dev/null; then
         curl -sSfL --connect-timeout 10 --max-time 30 "$url" -o "$destination" 2>/dev/null || {
-            print_warning "Failed to download: $file_path"
             return 1
         }
     elif command -v wget &> /dev/null; then
         wget -q --timeout=30 "$url" -O "$destination" 2>/dev/null || {
-            print_warning "Failed to download: $file_path"
             return 1
         }
     else
@@ -141,6 +139,7 @@ download_templates() {
         "docs/ops/monitoring_plan.md"
         "docs/ops/logs_schema.yaml"
         "generator_instructions/system_prompt.md"
+        "generator_instructions/generation_rules.yaml"
         "generator_instructions/file_update_policy.md"
         "generator_instructions/forbidden_actions.md"
         "meta/glossary.md"
@@ -154,18 +153,25 @@ download_templates() {
     local downloaded=0
     local failed=0
 
+    local total=${#files[@]}
+    local current=0
+
     for file in "${files[@]}"; do
+        current=$((current + 1))
         local dest_file="$project_name/$file"
         local dest_dir=$(dirname "$dest_file")
 
         mkdir -p "$dest_dir"
 
+        printf "\r  Progress: %d/%d files..." "$current" "$total"
+
         if download_file "$file" "$dest_file"; then
-            ((downloaded++))
+            downloaded=$((downloaded + 1))
         else
-            ((failed++))
+            failed=$((failed + 1))
         fi
     done
+    echo ""  # New line after progress
 
     print_success "Downloaded $downloaded files"
 
