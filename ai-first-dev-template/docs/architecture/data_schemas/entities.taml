@@ -1,0 +1,388 @@
+# エンティティ定義
+# Format: TAML (Text-based Application Markup Language)
+
+version: "1.0"
+last_updated: "YYYY-MM-DD"
+
+# =============================================================================
+# エンティティスキーマ定義
+# =============================================================================
+
+entities:
+
+  # ---------------------------------------------------------------------------
+  # User エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: User
+    description: "システム利用者"
+    table_name: users
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+        description: "一意識別子"
+
+      - name: email
+        type: string
+        max_length: 255
+        unique: true
+        nullable: false
+        description: "メールアドレス"
+
+      - name: name
+        type: string
+        max_length: 100
+        nullable: false
+        description: "表示名"
+
+      - name: role
+        type: enum
+        values: [admin, developer, viewer]
+        default: viewer
+        nullable: false
+        description: "ユーザー役割"
+
+      - name: password_hash
+        type: string
+        max_length: 255
+        nullable: false
+        description: "パスワードハッシュ（出力時除外）"
+        sensitive: true
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+      - name: updated_at
+        type: datetime
+        auto_now: true
+        nullable: false
+
+    indexes:
+      - fields: [email]
+        unique: true
+      - fields: [role]
+
+    validations:
+      - field: email
+        rule: email_format
+      - field: name
+        rule: min_length
+        value: 1
+
+  # ---------------------------------------------------------------------------
+  # Project エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: Project
+    description: "プロジェクト"
+    table_name: projects
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+
+      - name: name
+        type: string
+        max_length: 200
+        nullable: false
+        description: "プロジェクト名"
+
+      - name: description
+        type: text
+        nullable: true
+        description: "プロジェクト説明"
+
+      - name: owner_id
+        type: uuid
+        nullable: false
+        foreign_key:
+          table: users
+          field: id
+          on_delete: cascade
+        description: "オーナーユーザーID"
+
+      - name: status
+        type: enum
+        values: [active, archived, deleted]
+        default: active
+        nullable: false
+
+      - name: repository_url
+        type: string
+        max_length: 500
+        nullable: true
+        description: "Gitリポジトリ URL"
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+      - name: updated_at
+        type: datetime
+        auto_now: true
+        nullable: false
+
+    indexes:
+      - fields: [owner_id]
+      - fields: [status]
+      - fields: [name]
+
+  # ---------------------------------------------------------------------------
+  # Task エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: Task
+    description: "タスク"
+    table_name: tasks
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+
+      - name: project_id
+        type: uuid
+        nullable: false
+        foreign_key:
+          table: projects
+          field: id
+          on_delete: cascade
+
+      - name: title
+        type: string
+        max_length: 200
+        nullable: false
+
+      - name: description
+        type: text
+        nullable: true
+
+      - name: status
+        type: enum
+        values: [todo, in_progress, review, done]
+        default: todo
+        nullable: false
+
+      - name: priority
+        type: enum
+        values: [high, medium, low]
+        default: medium
+        nullable: false
+
+      - name: assignee_type
+        type: enum
+        values: [human, ai_agent]
+        nullable: false
+
+      - name: assignee_id
+        type: uuid
+        nullable: true
+        description: "担当者ID（User または AIAgent）"
+
+      - name: due_date
+        type: date
+        nullable: true
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+      - name: updated_at
+        type: datetime
+        auto_now: true
+        nullable: false
+
+    indexes:
+      - fields: [project_id]
+      - fields: [status]
+      - fields: [assignee_type, assignee_id]
+      - fields: [due_date]
+
+  # ---------------------------------------------------------------------------
+  # AIAgent エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: AIAgent
+    description: "AIエージェント"
+    table_name: ai_agents
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+
+      - name: name
+        type: string
+        max_length: 100
+        nullable: false
+
+      - name: role
+        type: enum
+        values: [developer, reviewer, tester, architect]
+        nullable: false
+
+      - name: owner_id
+        type: uuid
+        nullable: false
+        foreign_key:
+          table: users
+          field: id
+          on_delete: cascade
+
+      - name: config
+        type: json
+        nullable: true
+        description: "エージェント設定"
+
+      - name: status
+        type: enum
+        values: [active, paused, disabled]
+        default: active
+        nullable: false
+
+      - name: last_active_at
+        type: datetime
+        nullable: true
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+    indexes:
+      - fields: [owner_id]
+      - fields: [role]
+      - fields: [status]
+
+  # ---------------------------------------------------------------------------
+  # Document エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: Document
+    description: "ドキュメント"
+    table_name: documents
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+
+      - name: project_id
+        type: uuid
+        nullable: false
+        foreign_key:
+          table: projects
+          field: id
+          on_delete: cascade
+
+      - name: title
+        type: string
+        max_length: 300
+        nullable: false
+
+      - name: content
+        type: text
+        nullable: false
+
+      - name: type
+        type: enum
+        values: [spec, design, api, guide, other]
+        nullable: false
+
+      - name: version
+        type: integer
+        default: 1
+        nullable: false
+
+      - name: author_type
+        type: enum
+        values: [human, ai_agent]
+        nullable: false
+
+      - name: author_id
+        type: uuid
+        nullable: false
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+      - name: updated_at
+        type: datetime
+        auto_now: true
+        nullable: false
+
+    indexes:
+      - fields: [project_id]
+      - fields: [type]
+      - fields: [author_type, author_id]
+
+  # ---------------------------------------------------------------------------
+  # Commit エンティティ
+  # ---------------------------------------------------------------------------
+  - schema: Commit
+    description: "コミット履歴"
+    table_name: commits
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+
+      - name: task_id
+        type: uuid
+        nullable: false
+        foreign_key:
+          table: tasks
+          field: id
+          on_delete: cascade
+
+      - name: hash
+        type: string
+        max_length: 40
+        nullable: false
+        unique: true
+
+      - name: message
+        type: string
+        max_length: 500
+        nullable: false
+
+      - name: author_type
+        type: enum
+        values: [human, ai_agent]
+        nullable: false
+
+      - name: author_id
+        type: uuid
+        nullable: false
+
+      - name: files_changed
+        type: integer
+        default: 0
+        nullable: false
+
+      - name: additions
+        type: integer
+        default: 0
+        nullable: false
+
+      - name: deletions
+        type: integer
+        default: 0
+        nullable: false
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+    indexes:
+      - fields: [task_id]
+      - fields: [hash]
+        unique: true
+      - fields: [author_type, author_id]
+      - fields: [created_at]

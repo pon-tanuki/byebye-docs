@@ -1,0 +1,437 @@
+# ログスキーマ定義
+# Format: TAML (Text-based Application Markup Language)
+
+version: "1.0"
+last_updated: "YYYY-MM-DD"
+
+# =============================================================================
+# ログイベント定義
+# =============================================================================
+
+log_events:
+
+  # ---------------------------------------------------------------------------
+  # アプリケーションログ
+  # ---------------------------------------------------------------------------
+  application:
+    - event_type: "request"
+      description: "HTTPリクエストログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+          format: "ISO8601"
+        - name: level
+          type: enum
+          values: [DEBUG, INFO, WARN, ERROR]
+          required: true
+        - name: trace_id
+          type: string
+          required: true
+          description: "分散トレーシング用ID"
+        - name: span_id
+          type: string
+          required: true
+        - name: service
+          type: string
+          required: true
+        - name: method
+          type: string
+          required: true
+          description: "HTTPメソッド"
+        - name: path
+          type: string
+          required: true
+        - name: status_code
+          type: integer
+          required: true
+        - name: duration_ms
+          type: integer
+          required: true
+        - name: user_id
+          type: string
+          required: false
+          sensitive: true
+        - name: request_id
+          type: string
+          required: true
+        - name: user_agent
+          type: string
+          required: false
+        - name: ip_address
+          type: string
+          required: false
+          sensitive: true
+          masking: "partial"  # 192.168.xxx.xxx
+
+    - event_type: "error"
+      description: "エラーログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: level
+          type: enum
+          values: [ERROR, FATAL]
+          required: true
+        - name: trace_id
+          type: string
+          required: true
+        - name: service
+          type: string
+          required: true
+        - name: error_code
+          type: string
+          required: true
+        - name: error_message
+          type: string
+          required: true
+        - name: stack_trace
+          type: string
+          required: false
+        - name: context
+          type: object
+          required: false
+          description: "追加のコンテキスト情報"
+        - name: severity
+          type: enum
+          values: [low, medium, high, critical]
+          required: true
+
+    - event_type: "business"
+      description: "ビジネスイベントログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: event_name
+          type: string
+          required: true
+          description: "イベント名（user_registered, order_placed等）"
+        - name: user_id
+          type: string
+          required: false
+          sensitive: true
+        - name: entity_type
+          type: string
+          required: true
+        - name: entity_id
+          type: string
+          required: true
+        - name: action
+          type: string
+          required: true
+        - name: properties
+          type: object
+          required: false
+
+  # ---------------------------------------------------------------------------
+  # AIエージェントログ
+  # ---------------------------------------------------------------------------
+  ai_agent:
+    - event_type: "agent_action"
+      description: "AIエージェントアクションログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: agent_id
+          type: string
+          required: true
+        - name: agent_role
+          type: enum
+          values: [developer, reviewer, qa, architect]
+          required: true
+        - name: task_id
+          type: string
+          required: true
+        - name: action_type
+          type: enum
+          values:
+            - task_started
+            - task_completed
+            - task_failed
+            - code_generated
+            - code_modified
+            - test_executed
+            - review_performed
+            - commit_created
+            - pr_created
+            - escalation_raised
+          required: true
+        - name: status
+          type: enum
+          values: [started, in_progress, completed, failed, blocked]
+          required: true
+        - name: duration_ms
+          type: integer
+          required: false
+        - name: input_summary
+          type: string
+          required: false
+          max_length: 1000
+        - name: output_summary
+          type: string
+          required: false
+          max_length: 1000
+        - name: files_affected
+          type: array
+          items: string
+          required: false
+        - name: lines_changed
+          type: object
+          required: false
+          properties:
+            added:
+              type: integer
+            removed:
+              type: integer
+        - name: model_info
+          type: object
+          required: false
+          properties:
+            model_name:
+              type: string
+            model_version:
+              type: string
+            confidence_score:
+              type: number
+        - name: error_info
+          type: object
+          required: false
+          properties:
+            error_code:
+              type: string
+            error_message:
+              type: string
+            retry_count:
+              type: integer
+
+    - event_type: "agent_decision"
+      description: "AIエージェント意思決定ログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: agent_id
+          type: string
+          required: true
+        - name: task_id
+          type: string
+          required: true
+        - name: decision_type
+          type: string
+          required: true
+          description: "判断種別（tool_selection, approach_choice等）"
+        - name: options_considered
+          type: array
+          items: string
+          required: true
+        - name: selected_option
+          type: string
+          required: true
+        - name: reasoning
+          type: string
+          required: false
+          max_length: 2000
+        - name: confidence
+          type: number
+          required: false
+          min: 0
+          max: 1
+
+    - event_type: "agent_communication"
+      description: "エージェント間通信ログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: from_agent_id
+          type: string
+          required: true
+        - name: to_agent_id
+          type: string
+          required: true
+        - name: message_type
+          type: enum
+          values: [request, response, notification, escalation]
+          required: true
+        - name: content_summary
+          type: string
+          required: true
+          max_length: 500
+        - name: correlation_id
+          type: string
+          required: true
+
+  # ---------------------------------------------------------------------------
+  # セキュリティログ
+  # ---------------------------------------------------------------------------
+  security:
+    - event_type: "authentication"
+      description: "認証イベントログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: event_subtype
+          type: enum
+          values: [login_success, login_failure, logout, token_refresh, mfa_challenge]
+          required: true
+        - name: user_id
+          type: string
+          required: false
+          sensitive: true
+        - name: ip_address
+          type: string
+          required: true
+          sensitive: true
+        - name: user_agent
+          type: string
+          required: false
+        - name: auth_method
+          type: string
+          required: true
+        - name: failure_reason
+          type: string
+          required: false
+
+    - event_type: "authorization"
+      description: "認可イベントログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: event_subtype
+          type: enum
+          values: [access_granted, access_denied, permission_changed]
+          required: true
+        - name: user_id
+          type: string
+          required: true
+          sensitive: true
+        - name: resource
+          type: string
+          required: true
+        - name: action
+          type: string
+          required: true
+        - name: result
+          type: enum
+          values: [allowed, denied]
+          required: true
+        - name: reason
+          type: string
+          required: false
+
+    - event_type: "data_access"
+      description: "データアクセスログ"
+      fields:
+        - name: timestamp
+          type: datetime
+          required: true
+        - name: accessor_type
+          type: enum
+          values: [user, agent, service]
+          required: true
+        - name: accessor_id
+          type: string
+          required: true
+        - name: data_type
+          type: string
+          required: true
+        - name: operation
+          type: enum
+          values: [read, write, delete]
+          required: true
+        - name: record_count
+          type: integer
+          required: false
+        - name: contains_pii
+          type: boolean
+          required: true
+
+# =============================================================================
+# 観測可能性データ構造
+# =============================================================================
+
+observability:
+
+  # ---------------------------------------------------------------------------
+  # メトリクス
+  # ---------------------------------------------------------------------------
+  metrics:
+    - name: "http_request_duration_seconds"
+      type: histogram
+      description: "HTTPリクエストのレイテンシ"
+      labels: [service, method, path, status_code]
+      buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+
+    - name: "http_requests_total"
+      type: counter
+      description: "HTTPリクエスト総数"
+      labels: [service, method, path, status_code]
+
+    - name: "agent_task_duration_seconds"
+      type: histogram
+      description: "エージェントタスク処理時間"
+      labels: [agent_id, agent_role, task_type, status]
+      buckets: [1, 5, 10, 30, 60, 120, 300, 600]
+
+    - name: "agent_tasks_total"
+      type: counter
+      description: "エージェントタスク総数"
+      labels: [agent_role, task_type, status]
+
+    - name: "agent_code_lines_generated"
+      type: counter
+      description: "エージェント生成コード行数"
+      labels: [agent_id, language]
+
+    - name: "agent_errors_total"
+      type: counter
+      description: "エージェントエラー総数"
+      labels: [agent_id, error_type]
+
+  # ---------------------------------------------------------------------------
+  # トレース
+  # ---------------------------------------------------------------------------
+  traces:
+    sampling:
+      default_rate: 0.1  # 10%
+      error_rate: 1.0    # エラーは100%
+      agent_rate: 1.0    # エージェントは100%
+
+    propagation:
+      format: "w3c"  # W3C Trace Context
+      headers:
+        - traceparent
+        - tracestate
+
+    span_attributes:
+      required:
+        - service.name
+        - service.version
+        - deployment.environment
+      optional:
+        - user.id
+        - agent.id
+        - task.id
+
+# =============================================================================
+# ログ保持ポリシー
+# =============================================================================
+
+retention:
+  application:
+    default: "14 days"
+    error: "90 days"
+  ai_agent:
+    default: "30 days"
+    decision: "90 days"
+  security:
+    default: "365 days"
+  metrics:
+    raw: "15 days"
+    aggregated_1h: "90 days"
+    aggregated_1d: "2 years"

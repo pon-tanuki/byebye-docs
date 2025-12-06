@@ -1,0 +1,285 @@
+# ファイル生成ルール
+# Format: TAML (Text-based Application Markup Language)
+
+version: "1.0"
+last_updated: "YYYY-MM-DD"
+
+# =============================================================================
+# ファイル生成ルール
+# =============================================================================
+
+generation_rules:
+
+  # ---------------------------------------------------------------------------
+  # 許可されるファイル操作
+  # ---------------------------------------------------------------------------
+  allowed_operations:
+    create:
+      - scope: "src/**"
+        conditions:
+          - "テストが同時に作成される"
+          - "既存のアーキテクチャに準拠"
+        requires_review: false
+
+      - scope: "tests/**"
+        conditions:
+          - "対象コードが存在する"
+        requires_review: false
+
+      - scope: "docs/**"
+        conditions:
+          - "テンプレートに準拠"
+        requires_review: false
+
+      - scope: "config/**"
+        conditions:
+          - "既存の設定形式に準拠"
+        requires_review: true
+
+    modify:
+      - scope: "src/**"
+        conditions:
+          - "変更行数が500行以内"
+          - "テストが更新される"
+        requires_review: false
+
+      - scope: "tests/**"
+        conditions: []
+        requires_review: false
+
+      - scope: "docs/**"
+        conditions:
+          - "セクション追記のみ"
+        requires_review: false
+
+    delete:
+      - scope: "src/**"
+        conditions:
+          - "未使用であることが確認済み"
+          - "参照が存在しない"
+        requires_review: true
+
+      - scope: "tests/**"
+        conditions:
+          - "対象コードが削除済み"
+        requires_review: true
+
+  # ---------------------------------------------------------------------------
+  # 禁止されるファイル操作
+  # ---------------------------------------------------------------------------
+  forbidden_operations:
+    - operation: "create"
+      scope: ".env*"
+      reason: "機密情報を含む可能性"
+
+    - operation: "modify"
+      scope: ".env*"
+      reason: "機密情報を含む可能性"
+
+    - operation: "create"
+      scope: "**/credentials/**"
+      reason: "認証情報ディレクトリ"
+
+    - operation: "create"
+      scope: "**/secrets/**"
+      reason: "シークレットディレクトリ"
+
+    - operation: "modify"
+      scope: "package-lock.json"
+      reason: "自動生成ファイル"
+
+    - operation: "modify"
+      scope: "yarn.lock"
+      reason: "自動生成ファイル"
+
+    - operation: "delete"
+      scope: "**/*.md"
+      reason: "ドキュメント保護"
+      exception: "明示的な指示がある場合"
+
+    - operation: "any"
+      scope: ".git/**"
+      reason: "Gitリポジトリ保護"
+
+    - operation: "any"
+      scope: "node_modules/**"
+      reason: "依存関係ディレクトリ"
+
+# =============================================================================
+# 境界条件
+# =============================================================================
+
+boundary_conditions:
+
+  # ---------------------------------------------------------------------------
+  # ファイルサイズ制限
+  # ---------------------------------------------------------------------------
+  file_size:
+    max_lines_per_file: 500
+    max_bytes_per_file: 50000
+    action_on_exceed: "split_or_confirm"
+
+  # ---------------------------------------------------------------------------
+  # 変更量制限
+  # ---------------------------------------------------------------------------
+  change_limits:
+    max_files_per_commit: 10
+    max_lines_per_commit: 500
+    max_files_per_pr: 30
+    action_on_exceed: "require_approval"
+
+  # ---------------------------------------------------------------------------
+  # ディレクトリ構造制限
+  # ---------------------------------------------------------------------------
+  directory_structure:
+    max_depth: 5
+    allowed_root_dirs:
+      - src
+      - tests
+      - docs
+      - config
+      - scripts
+      - public
+      - assets
+    forbidden_patterns:
+      - "**/__pycache__/**"
+      - "**/node_modules/**"
+      - "**/.cache/**"
+      - "**/dist/**"
+      - "**/build/**"
+
+  # ---------------------------------------------------------------------------
+  # 命名規則
+  # ---------------------------------------------------------------------------
+  naming_conventions:
+    files:
+      - pattern: "src/**/*.ts"
+        convention: "camelCase"
+        example: "userService.ts"
+
+      - pattern: "src/**/*.tsx"
+        convention: "PascalCase"
+        example: "UserProfile.tsx"
+
+      - pattern: "tests/**/*.test.ts"
+        convention: "camelCase"
+        example: "userService.test.ts"
+
+      - pattern: "docs/**/*.md"
+        convention: "snake_case"
+        example: "api_reference.md"
+
+    directories:
+      convention: "kebab-case"
+      example: "user-management"
+
+# =============================================================================
+# 生成時の品質ルール
+# =============================================================================
+
+quality_rules:
+
+  # ---------------------------------------------------------------------------
+  # コード品質
+  # ---------------------------------------------------------------------------
+  code:
+    - rule: "型アノテーション必須"
+      scope: ["*.ts", "*.tsx", "*.py"]
+      severity: error
+
+    - rule: "ドキュメンテーションコメント必須"
+      scope: ["public functions", "classes", "interfaces"]
+      severity: warning
+
+    - rule: "マジックナンバー禁止"
+      scope: ["*.ts", "*.tsx", "*.py"]
+      severity: warning
+
+    - rule: "console.log禁止（本番コード）"
+      scope: ["src/**"]
+      severity: error
+      exception: "明示的なデバッグ用途"
+
+  # ---------------------------------------------------------------------------
+  # テスト品質
+  # ---------------------------------------------------------------------------
+  tests:
+    - rule: "describe/itブロック必須"
+      scope: ["*.test.ts", "*.spec.ts"]
+      severity: error
+
+    - rule: "アサーション必須"
+      scope: ["*.test.ts", "*.spec.ts"]
+      severity: error
+
+    - rule: "テストデータのハードコーディング禁止"
+      scope: ["*.test.ts", "*.spec.ts"]
+      severity: warning
+
+  # ---------------------------------------------------------------------------
+  # ドキュメント品質
+  # ---------------------------------------------------------------------------
+  documentation:
+    - rule: "見出し構造の一貫性"
+      scope: ["*.md"]
+      severity: warning
+
+    - rule: "更新日付の記載"
+      scope: ["docs/**/*.md"]
+      severity: warning
+
+    - rule: "リンク切れ禁止"
+      scope: ["*.md"]
+      severity: error
+
+# =============================================================================
+# 自動生成テンプレート
+# =============================================================================
+
+templates:
+
+  typescript_file:
+    header: |
+      /**
+       * @fileoverview [ファイルの説明]
+       * @module [モジュール名]
+       */
+
+    footer: |
+      // End of file
+
+  test_file:
+    structure: |
+      describe('[テスト対象]', () => {
+        beforeEach(() => {
+          // セットアップ
+        });
+
+        afterEach(() => {
+          // クリーンアップ
+        });
+
+        describe('[メソッド/機能]', () => {
+          it('should [期待される動作]', () => {
+            // Arrange
+            // Act
+            // Assert
+          });
+        });
+      });
+
+  markdown_doc:
+    header: |
+      # [タイトル]
+
+      ## 概要
+
+      [概要説明]
+
+      ---
+
+    footer: |
+      ---
+
+      _最終更新日: YYYY-MM-DD_
+      _更新者: [担当者/AIエージェント名]_
