@@ -49,6 +49,12 @@ print_success() {
 # Check if project directory already exists
 check_directory() {
     local project_name=$1
+
+    # If using current directory, don't check existence
+    if [ "$project_name" = "." ]; then
+        return 0
+    fi
+
     if [ -d "$project_name" ]; then
         print_error "Directory '$project_name' already exists!"
         echo ""
@@ -171,6 +177,12 @@ download_templates() {
 # Create project-specific files
 create_project_files() {
     local project_name=$1
+    local display_name="$project_name"
+
+    # For current directory, use the directory name
+    if [ "$project_name" = "." ]; then
+        display_name="$(basename "$(pwd)")"
+    fi
 
     print_step "Creating project-specific files..."
 
@@ -255,7 +267,7 @@ EOF
 
     # Create project README
     cat > "$project_name/PROJECT_README.md" <<EOF
-# $project_name
+# $display_name
 
 AIファースト開発テンプレートを使用したプロジェクトです。
 
@@ -288,7 +300,7 @@ $(date '+%Y-%m-%d %H:%M:%S')
 ## ドキュメント構造
 
 \`\`\`
-$project_name/
+$display_name/
 ├── docs/                          # ドキュメント
 │   ├── product/                   # プロダクト定義
 │   ├── architecture/              # アーキテクチャ
@@ -354,13 +366,19 @@ Repository: ${REPO_URL}
 # Create project metadata
 create_metadata() {
     local project_name=$1
+    local display_name="$project_name"
+
+    # For current directory, use the directory name
+    if [ "$project_name" = "." ]; then
+        display_name="$(basename "$(pwd)")"
+    fi
 
     cat > "$project_name/.template-metadata.json" <<EOF
 {
   "template_version": "${TEMPLATE_VERSION}",
   "template_source": "${REPO_URL}",
   "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "project_name": "$project_name"
+  "project_name": "$display_name"
 }
 EOF
 }
@@ -375,25 +393,33 @@ print_next_steps() {
     print_message "$GREEN" "═══════════════════════════════════════════════════════════"
     echo ""
 
-    echo "Your AI-first development project is ready at: $project_name/"
+    if [ "$project_name" = "." ]; then
+        echo "Your AI-first development templates have been installed in the current directory."
+    else
+        echo "Your AI-first development project is ready at: $project_name/"
+    fi
     echo ""
     echo "Next steps:"
     echo ""
-    echo "  1. Navigate to your project:"
-    print_message "$BLUE" "     cd $project_name"
-    echo ""
-    echo "  2. Review the project README:"
+
+    if [ "$project_name" != "." ]; then
+        echo "  1. Navigate to your project:"
+        print_message "$BLUE" "     cd $project_name"
+        echo ""
+    fi
+
+    echo "  $([ "$project_name" = "." ] && echo "1" || echo "2"). Review the project README:"
     print_message "$BLUE" "     cat PROJECT_README.md"
     echo ""
-    echo "  3. Customize project information:"
+    echo "  $([ "$project_name" = "." ] && echo "2" || echo "3"). Customize project information:"
     print_message "$BLUE" "     \$EDITOR docs/product/vision.md"
     print_message "$BLUE" "     \$EDITOR docs/product/requirements.yaml"
     echo ""
-    echo "  4. Start using AI agents:"
+    echo "  $([ "$project_name" = "." ] && echo "3" || echo "4"). Start using AI agents:"
     print_message "$BLUE" "     # Reference CLAUDE.md for AI instructions"
     print_message "$BLUE" "     # AI agents will read this automatically"
     echo ""
-    echo "  5. (Optional) Setup remote repository:"
+    echo "  $([ "$project_name" = "." ] && echo "4" || echo "5"). (Optional) Setup remote repository:"
     print_message "$BLUE" "     git remote add origin <your-repo-url>"
     print_message "$BLUE" "     git push -u origin main"
     echo ""
@@ -404,12 +430,13 @@ print_next_steps() {
 # Show usage
 show_usage() {
     cat <<EOF
-Usage: $0 [OPTIONS] <project-name>
+Usage: $0 [OPTIONS] [project-name]
 
 Setup AI-first development template for a new project.
 
 Arguments:
-  project-name    Name of the project directory to create
+  project-name    Name of the project directory to create (optional)
+                  If not specified, templates will be installed in the current directory
 
 Options:
   -h, --help      Show this help message
@@ -417,13 +444,19 @@ Options:
   --no-git        Skip git repository initialization
 
 Examples:
-  # Create new project
+  # Install templates in current directory
+  $0
+
+  # Create new project directory
   $0 my-awesome-project
 
   # Create project without git initialization
   $0 --no-git my-project
 
-  # Quick setup with curl
+  # Quick setup with curl (current directory)
+  curl -fsSL https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh | bash
+
+  # Quick setup with curl (new directory)
   curl -fsSL https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh | bash -s my-project
 
 EOF
@@ -462,16 +495,14 @@ main() {
         esac
     done
 
-    # Check if project name is provided
+    # If no project name is provided, use current directory
     if [ -z "$project_name" ]; then
-        print_error "Project name is required"
-        echo ""
-        show_usage
-        exit 1
+        project_name="."
+        print_warning "No project name specified. Installing templates in current directory."
     fi
 
-    # Validate project name
-    if [[ ! "$project_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    # Validate project name (skip validation for current directory)
+    if [ "$project_name" != "." ] && [[ ! "$project_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
         print_error "Invalid project name. Use only letters, numbers, hyphens, and underscores."
         exit 1
     fi
@@ -487,9 +518,13 @@ main() {
     create_project_files "$project_name"
     create_metadata "$project_name"
 
-    # Initialize git if not skipped
+    # Initialize git if not skipped (skip for current directory if already a git repo)
     if [ "$skip_git" = false ]; then
-        init_git "$project_name"
+        if [ "$project_name" = "." ] && [ -d ".git" ]; then
+            print_warning "Git repository already exists. Skipping git initialization."
+        else
+            init_git "$project_name"
+        fi
     fi
 
     # Print next steps
