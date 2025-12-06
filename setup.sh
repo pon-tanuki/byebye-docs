@@ -73,12 +73,12 @@ download_file() {
     local url="${RAW_BASE_URL}/${file_path}"
 
     if command -v curl &> /dev/null; then
-        curl -sSfL "$url" -o "$destination" 2>/dev/null || {
+        curl -sSfL --connect-timeout 10 --max-time 30 "$url" -o "$destination" 2>/dev/null || {
             print_warning "Failed to download: $file_path"
             return 1
         }
     elif command -v wget &> /dev/null; then
-        wget -q "$url" -O "$destination" 2>/dev/null || {
+        wget -q --timeout=30 "$url" -O "$destination" 2>/dev/null || {
             print_warning "Failed to download: $file_path"
             return 1
         }
