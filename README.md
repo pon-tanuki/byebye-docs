@@ -39,7 +39,9 @@ your-project/
 
 ## 🚀 Let's Vibe!!!
 
-### Step 1: クローンしてGit履歴を消す
+### 🆕 新規プロジェクトの場合
+
+#### Step 1: クローンしてGit履歴を消す
 
 ```bash
 git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git my-awesome-project
@@ -47,7 +49,7 @@ cd my-awesome-project
 rm -rf .git && git init
 ```
 
-### Step 2: YAMLを編集
+#### Step 2: YAMLを編集
 
 `.agent/` 配下のYAMLファイルを自分のプロジェクトに合わせて編集。
 
@@ -58,13 +60,66 @@ rm -rf .git && git init
 | `constraints.yaml` | AIにやらせたくないこと |
 | `codegen.yaml` | コーディング規約 |
 
-### Step 3: AIに丸投げ
+#### Step 3: AIに丸投げ
 
 ```
 あなた: 「ユーザー認証機能を実装して」
 AI: *manifest.yaml を読む* → *必要なファイルだけ読む* → *実装する*
 あなた: 😎
 ```
+
+---
+
+### 📦 既存プロジェクトに適用する場合
+
+すでにコードがあるプロジェクトにこのテンプレートを導入したい？簡単だよ。
+
+#### Step 1: `.agent/` をコピー
+
+```bash
+# このリポジトリをクローン（一時的）
+git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git /tmp/ai-template
+
+# 既存プロジェクトに .agent/ と CLAUDE.md をコピー
+cp -r /tmp/ai-template/.agent /path/to/your-project/
+cp /tmp/ai-template/CLAUDE.md /path/to/your-project/
+
+# お掃除
+rm -rf /tmp/ai-template
+```
+
+#### Step 2: プロジェクトに合わせてYAMLを編集
+
+```bash
+cd /path/to/your-project
+```
+
+**最低限これだけ編集すればOK:**
+
+| ファイル | やること |
+|---------|---------|
+| `context.yaml` | `product.name` と `product.vision` を書き換え |
+| `architecture.yaml` | `system.name` と `system.type` を書き換え |
+| `constraints.yaml` | `file_policy.editable` を実際のソースパスに変更 |
+| `codegen.yaml` | 使う言語だけ残す（不要な言語は削除） |
+
+**Pro tip:** AIに「このプロジェクトの構成を分析して `.agent/` を埋めて」って頼むのもアリ。
+
+#### Step 3: .gitignore に追加（任意）
+
+```bash
+# AIの設定を共有したくない場合
+echo ".agent/" >> .gitignore
+```
+
+#### Step 4: コミット
+
+```bash
+git add .agent/ CLAUDE.md
+git commit -m "feat: AI-First開発テンプレートを導入"
+```
+
+これで既存プロジェクトがAI効率特化に進化！🚀
 
 ## 🧠 AIはこう動く
 
