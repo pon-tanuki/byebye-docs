@@ -1,0 +1,57 @@
+version: "1.0"
+
+system:
+  name: "[SYSTEM_NAME]"
+  type: "[web_app|api|cli|library]"
+
+components:
+  frontend:
+    - name: "[COMPONENT_NAME]"
+      tech: "[TECHNOLOGY]"
+      responsibility: "[RESPONSIBILITY]"
+
+  backend:
+    - name: "[SERVICE_NAME]"
+      tech: "[TECHNOLOGY]"
+      responsibility: "[RESPONSIBILITY]"
+      endpoints: []
+
+  data:
+    - name: "[DATABASE_NAME]"
+      type: "[postgresql|mysql|mongodb|redis]"
+      purpose: "[PURPOSE]"
+
+integrations:
+  external_apis: []
+  message_queues: []
+  caches: []
+
+domain_model:
+  aggregates:
+    - name: "[AGGREGATE_NAME]"
+      root: "[ROOT_ENTITY]"
+      entities: []
+      value_objects: []
+
+  relationships:
+    - from: "[ENTITY_A]"
+      to: "[ENTITY_B]"
+      type: "[one_to_many|many_to_many|one_to_one]"
+      description: "[RELATIONSHIP_DESC]"
+
+sequences:
+  - name: "[SEQUENCE_NAME]"
+    trigger: "[TRIGGER_EVENT]"
+    steps:
+      - actor: "[ACTOR]"
+        action: "[ACTION]"
+        target: "[TARGET]"
+
+deployment:
+  environments:
+    - name: development
+      url: "http://localhost:[PORT]"
+    - name: staging
+      url: "[STAGING_URL]"
+    - name: production
+      url: "[PRODUCTION_URL]"

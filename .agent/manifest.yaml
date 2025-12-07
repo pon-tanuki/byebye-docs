@@ -1,0 +1,56 @@
+version: "2.0"
+format: ai-optimized
+
+files:
+  context:
+    path: context.yaml
+    priority: 1
+    description: product vision, requirements, kpis
+  architecture:
+    path: architecture.yaml
+    priority: 2
+    description: system design, components, domain model
+  constraints:
+    path: constraints.yaml
+    priority: 1
+    description: security, file policy, escalation rules
+  codegen:
+    path: codegen.yaml
+    priority: 2
+    description: coding standards, testing, commit rules
+  api:
+    path: schemas/api.yaml
+    priority: 3
+    on_demand: true
+    description: OpenAPI specification
+  entities:
+    path: schemas/entities.yaml
+    priority: 3
+    on_demand: true
+    description: database entity definitions
+
+task_routing:
+  implement_feature:
+    files: [context, architecture, codegen]
+    description: new feature implementation
+  fix_bug:
+    files: [architecture, codegen, constraints]
+    description: bug fix
+  add_api:
+    files: [api, entities, codegen]
+    description: API endpoint addition
+  security_review:
+    files: [constraints]
+    description: security audit
+  refactor:
+    files: [architecture, codegen]
+    description: code refactoring
+  add_test:
+    files: [codegen, context]
+    description: test creation
+
+read_order:
+  - constraints
+  - codegen
+  - context
+  - architecture

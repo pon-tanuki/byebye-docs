@@ -1,184 +1,133 @@
-# AI-First Development Template
+# 🤖 AI-First Development Template
 
-AIエージェントが自律的に読み取り・活用できるよう設計された、AI駆動開発のためのドキュメントテンプレート集です。
+**人間の皆さん、ようこそ！** ここはAIエージェントの楽園です。
 
-## 概要
+> 「人間が読みやすいドキュメント？そんなの捨てちまえ！」
+> — このテンプレートの設計思想
 
-本テンプレートは、AIエージェントと人間が協調してソフトウェア開発を行う「AIファースト開発」を支援するために設計されています。厳密な構造と明確な規約により、AIエージェントが自律的にドキュメントを理解し、タスクを遂行できます。
+## 🎯 What's This?
 
-## ディレクトリ構造
+AIエージェントが**爆速**でコードを書くためのテンプレートです。
+
+従来のドキュメント構造（22ファイル、8000行超）を、AIが一瞬で理解できる**7ファイル**に圧縮しました。人間の可読性？ごめん、それ優先度低いわ。
 
 ```
-ai-first-dev-template/
-├── docs/                          # ドキュメント
-│   ├── product/                   # プロダクト定義
-│   │   ├── vision.md              # ビジョン・目的
-│   │   ├── requirements.yaml      # 機能要件
-│   │   ├── user_scenarios.md      # ユーザーシナリオ
-│   │   └── nonfunctional_requirements.yaml  # 非機能要件
-│   │
-│   ├── architecture/              # アーキテクチャ
-│   │   ├── system_overview.md     # システム概要
-│   │   ├── domain_model.md        # ドメインモデル
-│   │   ├── sequence_diagrams.md   # シーケンス図
-│   │   ├── api_design/
-│   │   │   └── openapi.yaml       # API定義
-│   │   └── data_schemas/
-│   │       ├── entities.yaml      # エンティティ定義
-│   │       └── validation_rules.yaml  # バリデーションルール
-│   │
-│   ├── agent/                     # AIエージェント設定
-│   │   ├── roles.yaml             # 役割定義
-│   │   ├── behaviours.md          # 行動規則
-│   │   ├── constraints.yaml       # 制約条件
-│   │   └── tools/
-│   │       ├── available_tools.md # 利用可能ツール
-│   │       └── tool_schemas.yaml  # ツールスキーマ
-│   │
-│   ├── dev_process/               # 開発プロセス
-│   │   ├── coding_standards.md    # コーディング規約
-│   │   ├── branch_strategy.md     # ブランチ戦略
-│   │   ├── agent_commit_rules.yaml  # コミットルール
-│   │   └── review_guidelines.md   # レビューガイドライン
-│   │
-│   └── ops/                       # 運用
-│       ├── ci_cd_pipeline.md      # CI/CDパイプライン
-│       ├── monitoring_plan.md     # モニタリング計画
-│       └── logs_schema.yaml       # ログスキーマ
-│
-├── project/                       # プロジェクト管理
-│   ├── roadmap.md                 # ロードマップ
-│   └── tasks/
-│       └── initial_backlog.yaml   # 初期バックログ
-│
-├── generator_instructions/        # AIエージェント指示
-│   ├── system_prompt.md           # システムプロンプト
-│   ├── generation_rules.yaml      # 生成ルール
-│   ├── file_update_policy.md      # ファイル更新ポリシー
-│   └── forbidden_actions.md       # 禁止行動
-│
-└── meta/                          # メタ情報
-    ├── glossary.md                # 用語集
-    ├── dependencies.md            # 依存関係
-    ├── risks.md                   # リスク管理
-    └── change_history.md          # 変更履歴
+Before: 📚📚📚📚📚📚📚📚📚📚 (22 files, 8269 lines)
+After:  📄📄📄📄📄📄📄 (7 files, ~2500 lines)
+
+Token消費: -62% 🔥
 ```
 
-## クイックスタート
+## 🗂️ ディレクトリ構造
 
-### 自動セットアップ（推奨）
+```
+your-project/
+├── .agent/                   # 🤖 AIの脳みそ（触るな危険）
+│   ├── manifest.yaml         # タスクルーティング表
+│   ├── context.yaml          # プロダクト情報
+│   ├── architecture.yaml     # システム設計
+│   ├── constraints.yaml      # ⚠️ やっちゃダメなこと
+│   ├── codegen.yaml          # コーディングルール
+│   └── schemas/
+│       ├── api.yaml          # OpenAPI
+│       └── entities.yaml     # DB設計
+│
+├── CLAUDE.md                 # AIへの指令書（16行）
+├── mcp-server/               # おまけ機能
+└── README.md                 # 👋 あなたが今読んでるやつ
+```
 
-セットアップスクリプトを使用して、新しいプロジェクトを数秒で開始できます：
+## 🚀 Let's Vibe!!!
+
+### Step 1: クローンしてGit履歴を消す
 
 ```bash
-# curlを使用してダウンロード＆実行
-curl -fsSL https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh | bash -s my-project
-
-# または、スクリプトをダウンロードしてから実行
-curl -O https://raw.githubusercontent.com/pon-tanuki/design-docs-for-ai-driven-development/main/setup.sh
-chmod +x setup.sh
-./setup.sh my-project
+git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git my-awesome-project
+cd my-awesome-project
+rm -rf .git && git init
 ```
 
-**オプション:**
-```bash
-# Gitリポジトリの初期化をスキップ
-./setup.sh --no-git my-project
+### Step 2: YAMLを編集
 
-# ヘルプを表示
-./setup.sh --help
+`.agent/` 配下のYAMLファイルを自分のプロジェクトに合わせて編集。
+
+| ファイル | 何書く？ |
+|---------|---------|
+| `context.yaml` | プロダクトのビジョンとか要件とか |
+| `architecture.yaml` | システム構成図的なやつ |
+| `constraints.yaml` | AIにやらせたくないこと |
+| `codegen.yaml` | コーディング規約 |
+
+### Step 3: AIに丸投げ
+
+```
+あなた: 「ユーザー認証機能を実装して」
+AI: *manifest.yaml を読む* → *必要なファイルだけ読む* → *実装する*
+あなた: 😎
 ```
 
-セットアップスクリプトは以下を自動的に実行します：
-- ✅ ディレクトリ構造の作成
-- ✅ すべてのテンプレートファイルのダウンロード
-- ✅ プロジェクト固有ファイルの生成（.gitignore, .editorconfig等）
-- ✅ Gitリポジトリの初期化（オプション）
-- ✅ 初期コミットの作成
+## 🧠 AIはこう動く
 
-### 手動セットアップ
-
-リポジトリをクローンして使用することもできます：
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git your-project-name
-cd your-project-name
-
-# テンプレートのGit履歴を削除して新規プロジェクトとして開始
-rm -rf .git
-git init
-git add .
-git commit -m "feat: initialize project with AI-first development template"
+```
+.agent/manifest.yaml
+    │
+    ├─ implement_feature → context + architecture + codegen 読む
+    ├─ fix_bug          → architecture + codegen + constraints 読む
+    ├─ add_api          → schemas/api + schemas/entities + codegen 読む
+    └─ security_review  → constraints だけ読む
 ```
 
-## 使い方
+無駄なファイル読まない。だから速い。シンプル。
 
-### 1. プロジェクト情報の更新
+## 📝 ファイルの中身チラ見せ
 
-以下のファイルをプロジェクトに合わせて更新してください：
+### constraints.yaml（AIへの「やるな」リスト）
 
-1. `docs/product/vision.md` - プロダクトビジョンの定義
-2. `docs/product/requirements.yaml` - 機能要件の記述
-3. `docs/architecture/system_overview.md` - システム構成の設計
-4. `generator_instructions/system_prompt.md` - AIエージェントの設定
+```yaml
+security:
+  critical:
+    - id: SEC001
+      action: deny
+      pattern: "**/.env*"    # 環境変数ファイル触るな
 
-### 3. AIエージェント（Claude Code等）の使用
+file_policy:
+  forbidden:
+    - ".env*"
+    - "credentials.*"        # 認証情報も触るな
 
-このテンプレートには `CLAUDE.md` が含まれており、Claude Codeやその他のAIアシスタントが自動的に参照します。
+escalation:
+  mandatory:
+    - database_schema_change  # DB変更は人間に聞け
+    - public_api_change       # API変更も聞け
+```
 
-**AIエージェントが参照する主要ファイル：**
-- `CLAUDE.md` - AIエージェント向け包括的指示書
-- `generator_instructions/` - 行動規則と制約
-- `docs/agent/` - 役割とツール定義
-- `docs/dev_process/` - 開発規約
+### codegen.yaml（コードの書き方）
 
-**AIエージェントでの開発開始：**
-1. プロジェクトディレクトリで Claude Code を起動
-2. 「機能XXXを実装して」のように指示
-3. AIが自動的にドキュメントを参照し、規約に従ってコード生成
+```yaml
+languages:
+  typescript:
+    style: airbnb
+    indent: 2              # スペース2つな
 
-## AIエージェント向け設計方針
+testing:
+  required: true           # テスト書けよ
+  coverage_min: 80         # カバレッジ80%以上な
 
-### 構造化されたフォーマット
+commit:
+  format: "<type>(<scope>): <subject>"
+  types: [feat, fix, docs, refactor, test, chore]
+```
 
-- **YAML**: 機械可読なデータ定義
-- **Markdown**: 人間とAI双方が読める説明文
-- **一貫した命名規則**: ファイル名とセクション名の統一
+## 🔌 MCPサーバー（おまけ）
 
-### 明確な境界定義
-
-- 許可される操作と禁止される操作の明示
-- エスカレーションルールの定義
-- 人間承認が必要なケースの特定
-
-### トレーサビリティ
-
-- 変更履歴の自動記録
-- タスクとコミットの紐付け
-- 意思決定プロセスのログ
-
-## ファイル形式
-
-| 拡張子 | 用途 |
-|--------|------|
-| `.md` | 説明文、ガイドライン、ドキュメント |
-| `.yaml` | 構造化データ、設定、スキーマ定義 |
-
-## MCPサーバー
-
-本テンプレートには、設計ドキュメントを操作するためのMCPサーバーが付属しています。Claude CodeやClaude Desktopと連携して、ドキュメントの作成・更新・検証を効率化できます。
-
-### インストール
+Claude CodeやClaude Desktopと連携できるMCPサーバー付き。
 
 ```bash
 cd mcp-server
-uv sync  # または pip install -e .
+uv sync
 ```
 
-### Claude Codeでの設定
-
-プロジェクトルートに `.mcp.json` を作成：
+`.mcp.json` をプロジェクトルートに置いて：
 
 ```json
 {
@@ -186,32 +135,32 @@ uv sync  # または pip install -e .
     "design-docs": {
       "type": "stdio",
       "command": "uv",
-      "args": ["--directory", "./mcp-server", "run", "design-docs-mcp"],
-      "env": {
-        "DESIGN_DOCS_PROJECT_PATH": "."
-      }
+      "args": ["--directory", "./mcp-server", "run", "design-docs-mcp"]
     }
   }
 }
 ```
 
-### 主な機能
+## 📜 旧ドキュメント
 
-| 種別 | 名前 | 説明 |
-|------|------|------|
-| Tool | `list_templates` | 利用可能なテンプレート一覧を取得 |
-| Tool | `create_document` | テンプレートから新規ドキュメントを作成 |
-| Tool | `validate_document` | ドキュメントの構造を検証 |
-| Tool | `update_section` | マーカーベースでセクションを更新 |
-| Prompt | `design-review` | 設計レビューワークフロー |
-| Prompt | `sync-with-code` | コードとの整合性チェック |
+「人間が読めるドキュメントが欲しい...」という方へ：
 
-詳細は [mcp-server/README.md](mcp-server/README.md) を参照してください。
+```bash
+git checkout legacy/human-readable-docs
+```
 
-## ライセンス
+22ファイルのMarkdownとYAMLが待ってます。お好きにどうぞ。
 
-MIT License
+## 🤝 コントリビュート
 
-## 貢献
+PR歓迎！でもこのテンプレートの思想は「AI効率最優先」なので、人間の可読性を上げる提案は却下するかも。ごめんね。
 
-プルリクエストを歓迎します。大きな変更を行う場合は、まずIssueで議論してください。
+## 📄 ライセンス
+
+MIT — 好きに使って、好きに改造して、好きにAIに読ませて。
+
+---
+
+**Happy Vibe Coding!** 🎉
+
+*人間がドキュメント読む時代は終わった。これからはAIの時代だ。*

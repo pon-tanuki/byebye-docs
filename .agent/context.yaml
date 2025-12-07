@@ -1,0 +1,58 @@
+version: "1.0"
+
+product:
+  name: "[PROJECT_NAME]"
+  vision: "[ONE_LINE_VISION]"
+  target_users:
+    - type: primary
+      description: "[PRIMARY_USER]"
+    - type: secondary
+      description: "[SECONDARY_USER]"
+
+requirements:
+  - id: F001
+    name: "[FEATURE_NAME]"
+    priority: high
+    status: draft
+    acceptance:
+      - "[CRITERIA_1]"
+      - "[CRITERIA_2]"
+
+  - id: F002
+    name: "[FEATURE_NAME]"
+    priority: medium
+    status: draft
+    acceptance:
+      - "[CRITERIA_1]"
+
+use_cases:
+  - id: UC001
+    name: "[USE_CASE_NAME]"
+    actor: "[ACTOR]"
+    input:
+      - field: "[FIELD_NAME]"
+        type: string
+        required: true
+    output:
+      - field: "[FIELD_NAME]"
+        type: string
+    errors:
+      - code: E001
+        condition: "[ERROR_CONDITION]"
+
+kpis:
+  - metric: "[METRIC_NAME]"
+    current: null
+    target: "[TARGET_VALUE]"
+    measure_method: "[HOW_TO_MEASURE]"
+
+constraints:
+  business:
+    - id: BC001
+      description: "[BUSINESS_CONSTRAINT]"
+  technical:
+    - id: TC001
+      description: "[TECHNICAL_CONSTRAINT]"
+  legal:
+    - id: LC001
+      description: "[LEGAL_CONSTRAINT]"

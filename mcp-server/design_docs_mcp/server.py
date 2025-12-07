@@ -20,116 +20,71 @@ from mcp.types import (
     Tool,
 )
 
-# Template structure definition
+# Template structure definition (AI-optimized flat structure)
 TEMPLATE_STRUCTURE = {
-    "docs": {
-        "product": {
-            "vision.md": {"required": True, "description": "プロダクトビジョン"},
-            "requirements.yaml": {"required": True, "description": "機能要件定義"},
-            "nonfunctional_requirements.yaml": {
-                "required": False,
-                "description": "非機能要件",
-            },
-            "user_scenarios.md": {"required": False, "description": "ユーザーシナリオ"},
+    ".agent": {
+        "manifest.yaml": {"required": True, "description": "ファイルインデックス・タスクルーティング"},
+        "context.yaml": {"required": True, "description": "プロダクト情報（ビジョン、要件、KPI）"},
+        "architecture.yaml": {"required": True, "description": "システム設計（コンポーネント、ドメインモデル）"},
+        "constraints.yaml": {"required": True, "description": "制約・禁止事項・セキュリティポリシー"},
+        "codegen.yaml": {"required": True, "description": "コード生成ルール（言語規約、テスト、コミット）"},
+        "schemas": {
+            "api.yaml": {"required": False, "description": "OpenAPI仕様"},
+            "entities.yaml": {"required": False, "description": "エンティティ定義"},
         },
-        "architecture": {
-            "system_overview.md": {"required": True, "description": "システム概要"},
-            "domain_model.md": {"required": False, "description": "ドメインモデル"},
-            "sequence_diagrams.md": {"required": False, "description": "シーケンス図"},
-            "api_design/openapi.yaml": {"required": False, "description": "API設計"},
-            "data_schemas/entities.yaml": {"required": False, "description": "エンティティ定義"},
-            "data_schemas/validation_rules.yaml": {
-                "required": False,
-                "description": "バリデーションルール",
-            },
-        },
-        "dev_process": {
-            "coding_standards.md": {"required": True, "description": "コーディング規約"},
-            "branch_strategy.md": {"required": False, "description": "ブランチ戦略"},
-            "review_guidelines.md": {"required": False, "description": "レビューガイドライン"},
-            "agent_commit_rules.yaml": {"required": False, "description": "エージェントコミットルール"},
-        },
-        "agent": {
-            "roles.yaml": {"required": True, "description": "役割定義"},
-            "constraints.yaml": {"required": True, "description": "制約条件"},
-            "behaviours.md": {"required": False, "description": "行動規則"},
-            "tools/available_tools.md": {"required": False, "description": "利用可能ツール"},
-            "tools/tool_schemas.yaml": {"required": False, "description": "ツールスキーマ"},
-        },
-        "ops": {
-            "ci_cd_pipeline.md": {"required": False, "description": "CI/CDパイプライン"},
-            "monitoring_plan.md": {"required": False, "description": "監視計画"},
-            "logs_schema.yaml": {"required": False, "description": "ログスキーマ"},
-        },
-    },
-    "generator_instructions": {
-        "system_prompt.md": {"required": True, "description": "システムプロンプト"},
-        "file_update_policy.md": {"required": True, "description": "ファイル更新ポリシー"},
-        "forbidden_actions.md": {"required": True, "description": "禁止事項"},
-        "generation_rules.yaml": {"required": False, "description": "生成ルール"},
-    },
-    "meta": {
-        "change_history.md": {"required": False, "description": "変更履歴"},
     },
 }
 
-# Document schemas for validation
+# Document schemas for validation (AI-optimized structure)
 DOCUMENT_SCHEMAS = {
-    "requirements.yaml": {
+    "manifest.yaml": {
         "type": "object",
-        "required": ["features"],
+        "required": ["version", "files"],
         "properties": {
-            "features": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "required": ["id", "name", "description"],
-                    "properties": {
-                        "id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
-                        "priority": {"type": "string", "enum": ["high", "medium", "low"]},
-                        "status": {"type": "string"},
-                    },
-                },
-            }
+            "version": {"type": "string"},
+            "files": {"type": "object"},
+            "task_routing": {"type": "object"},
         },
     },
-    "roles.yaml": {
+    "context.yaml": {
         "type": "object",
-        "required": ["roles"],
+        "required": ["version", "product"],
         "properties": {
-            "roles": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "required": ["id", "name", "permissions"],
-                    "properties": {
-                        "id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
-                        "permissions": {"type": "array", "items": {"type": "string"}},
-                    },
-                },
-            }
+            "version": {"type": "string"},
+            "product": {"type": "object"},
+            "requirements": {"type": "array"},
+            "kpis": {"type": "array"},
+        },
+    },
+    "architecture.yaml": {
+        "type": "object",
+        "required": ["version", "system"],
+        "properties": {
+            "version": {"type": "string"},
+            "system": {"type": "object"},
+            "components": {"type": "object"},
+            "domain_model": {"type": "object"},
         },
     },
     "constraints.yaml": {
         "type": "object",
-        "required": ["constraints"],
+        "required": ["version", "security"],
         "properties": {
-            "constraints": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "required": ["id", "description"],
-                    "properties": {
-                        "id": {"type": "string"},
-                        "description": {"type": "string"},
-                        "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
-                    },
-                },
-            }
+            "version": {"type": "string"},
+            "security": {"type": "object"},
+            "file_policy": {"type": "object"},
+            "escalation": {"type": "object"},
+            "roles": {"type": "object"},
+        },
+    },
+    "codegen.yaml": {
+        "type": "object",
+        "required": ["version", "languages"],
+        "properties": {
+            "version": {"type": "string"},
+            "languages": {"type": "object"},
+            "testing": {"type": "object"},
+            "commit": {"type": "object"},
         },
     },
 }
@@ -160,13 +115,13 @@ def flatten_structure(
 def list_existing_docs(project_root: Path) -> list[dict[str, Any]]:
     """List all existing documentation files in the project."""
     docs = []
-    docs_dir = project_root / "docs"
+    agent_dir = project_root / ".agent"
 
-    if not docs_dir.exists():
+    if not agent_dir.exists():
         return docs
 
-    for file_path in docs_dir.rglob("*"):
-        if file_path.is_file() and file_path.suffix in (".md", ".yaml", ".yml"):
+    for file_path in agent_dir.rglob("*"):
+        if file_path.is_file() and file_path.suffix in (".yaml", ".yml"):
             rel_path = file_path.relative_to(project_root)
             stat = file_path.stat()
             docs.append({
@@ -174,20 +129,6 @@ def list_existing_docs(project_root: Path) -> list[dict[str, Any]]:
                 "size": stat.st_size,
                 "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
             })
-
-    # Also check generator_instructions and meta directories
-    for dir_name in ["generator_instructions", "meta"]:
-        extra_dir = project_root / dir_name
-        if extra_dir.exists():
-            for file_path in extra_dir.rglob("*"):
-                if file_path.is_file() and file_path.suffix in (".md", ".yaml", ".yml"):
-                    rel_path = file_path.relative_to(project_root)
-                    stat = file_path.stat()
-                    docs.append({
-                        "path": str(rel_path),
-                        "size": stat.st_size,
-                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                    })
 
     return sorted(docs, key=lambda x: x["path"])
 
@@ -199,7 +140,8 @@ def get_project_info(project_root: Path) -> dict[str, Any]:
         "exists": project_root.exists(),
         "docs_count": 0,
         "has_claude_md": False,
-        "categories": [],
+        "has_agent_dir": False,
+        "agent_files": [],
     }
 
     if not project_root.exists():
@@ -208,15 +150,16 @@ def get_project_info(project_root: Path) -> dict[str, Any]:
     # Check for CLAUDE.md
     info["has_claude_md"] = (project_root / "CLAUDE.md").exists()
 
-    # Count docs and identify categories
-    docs_dir = project_root / "docs"
-    if docs_dir.exists():
-        categories = set()
-        for item in docs_dir.iterdir():
-            if item.is_dir():
-                categories.add(item.name)
-        info["categories"] = sorted(categories)
-        info["docs_count"] = len(list(docs_dir.rglob("*")))
+    # Check for .agent directory
+    agent_dir = project_root / ".agent"
+    if agent_dir.exists():
+        info["has_agent_dir"] = True
+        agent_files = []
+        for item in agent_dir.rglob("*.yaml"):
+            if item.is_file():
+                agent_files.append(str(item.relative_to(project_root)))
+        info["agent_files"] = sorted(agent_files)
+        info["docs_count"] = len(agent_files)
 
     return info
 
@@ -311,127 +254,133 @@ def validate_markdown_document(content: str, doc_type: str) -> dict[str, Any]:
 def get_template_for_doc(doc_type: str) -> str | None:
     """Get a template for creating a new document."""
     templates = {
-        "vision.md": """# プロダクトビジョン
+        "manifest.yaml": """version: "2.0"
+format: ai-optimized
 
-## プロダクトの目的
+files:
+  context:
+    path: context.yaml
+    priority: 1
+    description: product vision, requirements, kpis
+  architecture:
+    path: architecture.yaml
+    priority: 2
+    description: system design, components, domain model
+  constraints:
+    path: constraints.yaml
+    priority: 1
+    description: security, file policy, escalation rules
+  codegen:
+    path: codegen.yaml
+    priority: 2
+    description: coding standards, testing, commit rules
+  api:
+    path: schemas/api.yaml
+    priority: 3
+    on_demand: true
+    description: OpenAPI specification
+  entities:
+    path: schemas/entities.yaml
+    priority: 3
+    on_demand: true
+    description: database entity definitions
 
-<!-- このプロダクトが存在する理由を記述 -->
+task_routing:
+  implement_feature:
+    files: [context, architecture, codegen]
+  fix_bug:
+    files: [architecture, codegen, constraints]
+  add_api:
+    files: [api, entities, codegen]
+  security_review:
+    files: [constraints]
 
-- 目的: [プロダクトの主要な目的を記述]
-- ミッション: [達成したいミッションを記述]
-
-## 解決したい課題
-
-<!-- プロダクトが解決する具体的な課題 -->
-
-1. **課題1**: [課題の詳細説明]
-   - 現状: [現在の状況]
-   - 影響: [課題による影響]
-
-## ターゲットユーザー
-
-<!-- 主要なユーザーセグメント -->
-
-| ユーザー種別 | 特徴 | ニーズ |
-|-------------|------|--------|
-| プライマリユーザー | [特徴] | [ニーズ] |
-
-## 成功指標（KPI）
-
-<!-- 測定可能な成功指標 -->
-
-| 指標名 | 現在値 | 目標値 | 測定方法 |
-|--------|--------|--------|----------|
-| KPI-1 | - | - | [測定方法] |
-
----
-
-_最終更新日: YYYY-MM-DD_
-_更新者: [担当者/AIエージェント名]_
+read_order:
+  - constraints
+  - codegen
+  - context
+  - architecture
 """,
-        "requirements.yaml": """# 機能要件定義
-version: "1.0"
-last_updated: YYYY-MM-DD
+        "context.yaml": """version: "1.0"
 
-features:
+product:
+  name: "[PROJECT_NAME]"
+  vision: "[ONE_LINE_VISION]"
+
+requirements:
   - id: F001
-    name: "[機能名]"
-    description: "[機能の説明]"
-    priority: high  # high, medium, low
-    status: draft   # draft, approved, implemented
-    acceptance_criteria:
-      - "[受け入れ基準1]"
-      - "[受け入れ基準2]"
-    dependencies: []
+    name: "[FEATURE_NAME]"
+    priority: high
+    status: draft
+    acceptance:
+      - "[CRITERIA_1]"
+
+kpis:
+  - metric: "[METRIC_NAME]"
+    target: "[TARGET_VALUE]"
 """,
-        "roles.yaml": """# AIエージェント役割定義
-version: "1.0"
-last_updated: YYYY-MM-DD
+        "architecture.yaml": """version: "1.0"
+
+system:
+  name: "[SYSTEM_NAME]"
+  type: "[web_app|api|cli|library]"
+
+components:
+  frontend: []
+  backend: []
+  data: []
+
+domain_model:
+  aggregates: []
+  relationships: []
+""",
+        "constraints.yaml": """version: "1.0"
+
+security:
+  critical:
+    - id: SEC001
+      action: deny
+      pattern: "**/.env*"
+      reason: credentials exposure
+
+file_policy:
+  editable:
+    - "src/**/*"
+    - "tests/**/*"
+  forbidden:
+    - ".env*"
+    - "credentials.*"
+
+escalation:
+  mandatory:
+    - database_schema_change
+    - public_api_change
+    - security_config_change
 
 roles:
-  - id: developer
-    name: "開発エージェント"
-    description: "コード生成・修正を担当"
+  developer:
     permissions:
-      - "read:all"
-      - "write:code"
-      - "write:tests"
-      - "execute:lint"
-      - "execute:test"
-    restrictions:
-      - "no-production-deploy"
-      - "no-security-config-changes"
+      read: [source_code, tests, docs]
+      write: [source_code, tests]
+      execute: [tests, linters]
 """,
-        "constraints.yaml": """# AIエージェント制約条件
-version: "1.0"
-last_updated: YYYY-MM-DD
+        "codegen.yaml": """version: "1.0"
 
-constraints:
-  - id: C001
-    description: "機密情報を含むファイルの編集禁止"
-    severity: critical
-    scope:
-      - ".env*"
-      - "**/credentials*"
-      - "**/secrets*"
+languages:
+  typescript:
+    style: airbnb
+    formatter: prettier
+    linter: eslint
+    indent: 2
+    max_line: 100
 
-  - id: C002
-    description: "本番環境への直接デプロイ禁止"
-    severity: critical
-    action: escalate_to_human
-""",
-        "system_overview.md": """# システム概要
+testing:
+  required: true
+  coverage_min: 80
 
-## システム全体図
-
-```
-[システム構成図をここに記述]
-```
-
-## コンポーネント構成
-
-### 1. フロントエンド
-
-| コンポーネント | 説明 | 技術スタック |
-|---------------|------|-------------|
-| [コンポーネント名] | [説明] | [技術] |
-
-### 2. バックエンド
-
-| サービス | 責務 | 通信方式 |
-|---------|------|---------|
-| [サービス名] | [責務] | [通信方式] |
-
-### 3. データ層
-
-| コンポーネント | 用途 | 技術 |
-|---------------|------|------|
-| [コンポーネント名] | [用途] | [技術] |
-
----
-
-_最終更新日: YYYY-MM-DD_
-_更新者: [担当者/AIエージェント名]_
+commit:
+  format: "<type>(<scope>): <subject>"
+  types: [feat, fix, docs, refactor, test, chore]
 """,
     }
 
@@ -918,24 +867,19 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
 以下の手順で更新してください：
 
 1. **現状の確認**
-   - docs/architecture/system_overview.md を読み込む
-   - 関連するシーケンス図やドメインモデルを確認
+   - .agent/architecture.yaml を読み込む
+   - system, components, domain_model セクションを確認
 
 2. **影響範囲の特定**
    - 変更が影響するコンポーネントを特定
    - 依存関係を確認
 
 3. **ドキュメント更新**
-   - システム概要図を更新
-   - 必要に応じてシーケンス図を更新
-   - コンポーネント表を更新
+   - .agent/architecture.yaml の該当セクションを更新
 
 4. **整合性確認**
-   - 他のドキュメントとの整合性を確認
-   - API仕様との整合性を確認
-
-5. **変更履歴の記録**
-   - meta/change_history.md に変更を記録
+   - .agent/schemas/api.yaml との整合性を確認
+   - .agent/schemas/entities.yaml との整合性を確認
 
 更新後、変更サマリを報告してください。
 """,
@@ -959,16 +903,16 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
 以下の観点でチェックしてください：
 
 1. **API整合性**
-   - docs/architecture/api_design/openapi.yaml と実装コードの比較
+   - .agent/schemas/api.yaml と実装コードの比較
    - エンドポイント、パラメータ、レスポンス型の一致確認
 
 2. **データモデル整合性**
-   - docs/architecture/data_schemas/entities.yaml と実装の比較
+   - .agent/schemas/entities.yaml と実装の比較
    - エンティティ定義、フィールド、型の一致確認
 
-3. **ドメインモデル整合性**
-   - docs/architecture/domain_model.md と実装の比較
-   - ドメインオブジェクト、関係性の一致確認
+3. **アーキテクチャ整合性**
+   - .agent/architecture.yaml と実装の比較
+   - コンポーネント構成の一致確認
 
 4. **不整合の報告**
    - 発見した不整合を一覧化

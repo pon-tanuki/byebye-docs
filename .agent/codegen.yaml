@@ -1,0 +1,122 @@
+version: "1.0"
+
+languages:
+  python:
+    style: pep8
+    formatter: black
+    linter: [ruff, mypy]
+    indent: 4
+    max_line: 88
+    naming:
+      module: snake_case
+      class: PascalCase
+      function: snake_case
+      variable: snake_case
+      constant: UPPER_SNAKE_CASE
+      private: _prefix
+    docstring: google
+    type_hints: required
+
+  typescript:
+    style: airbnb
+    formatter: prettier
+    linter: eslint
+    indent: 2
+    max_line: 100
+    semicolon: true
+    naming:
+      file: camelCase
+      class: PascalCase
+      function: camelCase
+      variable: camelCase
+      constant: UPPER_SNAKE_CASE
+      interface: PascalCase
+      type: PascalCase
+    jsdoc: required_on_exports
+    types: explicit_return
+
+  go:
+    style: effective_go
+    formatter: [gofmt, goimports]
+    linter: golangci-lint
+    naming:
+      package: lowercase
+      exported: PascalCase
+      unexported: camelCase
+      interface: Verb_er
+      acronym: ALL_CAPS
+    doc_comments: required_on_exported
+
+testing:
+  required: true
+  coverage_min: 80
+  frameworks:
+    python: pytest
+    typescript: jest
+    go: go_test
+  patterns:
+    unit: "*.test.{ts,py,go}"
+    integration: "*.integration.{ts,py,go}"
+  rules:
+    - describe_block_required
+    - one_assertion_per_test
+    - no_test_skip_without_reason
+
+commit:
+  format: "<type>(<scope>): <subject>"
+  types:
+    - feat
+    - fix
+    - docs
+    - refactor
+    - test
+    - chore
+    - perf
+  max_subject_length: 72
+  body_required_for: [feat, fix]
+  footer:
+    - "Closes #<issue>"
+
+code_quality:
+  comments:
+    required:
+      - public_api_docs
+      - complex_algorithm_explanation
+      - todo_with_assignee_and_date
+    forbidden:
+      - obvious_code_repetition
+      - commented_out_code
+      - outdated_comments
+
+  error_handling:
+    recoverable: return_error
+    unrecoverable: exception_or_panic
+    message_format: specific_and_actionable
+
+  security:
+    required:
+      - input_validation
+      - parameterized_queries
+      - output_escaping
+    forbidden:
+      - hardcoded_credentials
+      - unencrypted_sensitive_data
+      - dynamic_code_execution
+
+file_structure:
+  config_files:
+    - .eslintrc.js
+    - .prettierrc
+    - pyproject.toml
+    - .golangci.yml
+    - .editorconfig
+
+ci_checks:
+  pre_commit:
+    - lint
+    - format
+    - type_check
+  pipeline:
+    - lint_all
+    - test_all
+    - security_scan

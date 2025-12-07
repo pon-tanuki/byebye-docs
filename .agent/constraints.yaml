@@ -1,0 +1,119 @@
+version: "1.0"
+
+security:
+  critical:
+    - id: SEC001
+      action: deny
+      pattern: "**/.env*"
+      reason: credentials exposure
+    - id: SEC002
+      action: deny
+      pattern: "**/secrets/**"
+      reason: sensitive data
+    - id: SEC003
+      action: deny
+      pattern: "**/credentials*"
+      reason: auth data
+    - id: SEC004
+      action: deny
+      scope: [/etc/*, /usr/*, /bin/*, /sbin/*]
+      reason: system files
+
+  high:
+    - id: SEC010
+      action: deny
+      pattern: "chmod 777"
+      reason: permission vulnerability
+    - id: SEC011
+      action: deny
+      pattern: "eval("
+      reason: code injection
+    - id: SEC012
+      action: require_review
+      pattern: "**/auth/**"
+      reason: authentication code
+
+  data_protection:
+    - pii_logging: deny
+    - unencrypted_transmission: deny
+    - hardcoded_credentials: deny
+
+file_policy:
+  editable:
+    - "src/**/*"
+    - "tests/**/*"
+    - "lib/**/*"
+  readonly:
+    - "package.json"
+    - "package-lock.json"
+    - "tsconfig.json"
+    - "pyproject.toml"
+    - "go.mod"
+    - "go.sum"
+  forbidden:
+    - ".env*"
+    - "credentials.*"
+    - "*.pem"
+    - "*.key"
+
+git_policy:
+  protected_branches: [main, master, release/*]
+  allowed_branches: [feature/*, fix/*, agent/*]
+  force_push: deny
+  direct_push_to_main: deny
+
+escalation:
+  mandatory:
+    - database_schema_change
+    - public_api_change
+    - security_config_change
+    - production_deploy
+    - dependency_addition
+  recommended:
+    - large_refactoring
+    - new_technology_adoption
+    - external_api_integration
+
+resource_limits:
+  execution_time: 30m
+  memory: 4GB
+  files_per_task: 100
+  lines_per_commit: 500
+  api_calls_per_hour: 1000
+
+violation_handling:
+  critical:
+    action: stop
+    notify: [security_team, admin]
+  high:
+    action: pause
+    notify: [team_lead]
+  medium:
+    action: warn
+    notify: [assignee]
+
+roles:
+  developer:
+    permissions:
+      read: [source_code, tests, docs]
+      write: [source_code, tests]
+      execute: [tests, linters, formatters]
+    restrictions:
+      - no_production_deploy
+      - no_security_config_change
+
+  reviewer:
+    permissions:
+      read: [all]
+      comment: [pull_requests]
+      approve: [minor_changes]
+    restrictions:
+      - final_merge_by_human
+
+  architect:
+    permissions:
+      read: [all]
+      write: [docs, design_docs]
+      propose: [architecture_changes]
+    restrictions:
+      - final_decision_by_human
