@@ -1,4 +1,4 @@
-"""Design Docs MCP Server implementation."""
+"""Byebye Docs MCP Server implementation."""
 
 import json
 import os
@@ -92,7 +92,7 @@ DOCUMENT_SCHEMAS = {
 
 def get_project_root() -> Path:
     """Get the project root directory from environment or current directory."""
-    env_path = os.environ.get("DESIGN_DOCS_PROJECT_PATH")
+    env_path = os.environ.get("BYEBYE_DOCS_PROJECT_PATH")
     if env_path:
         return Path(env_path)
     return Path.cwd()
