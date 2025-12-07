@@ -71,7 +71,7 @@ pip install -e .
         "byebye-docs"
       ],
       "env": {
-        "DESIGN_DOCS_PROJECT_PATH": "."
+        "BYEBYE_DOCS_PROJECT_PATH": "."
       }
     }
   }
@@ -82,7 +82,7 @@ pip install -e .
 
 | 変数名 | 説明 | デフォルト |
 |--------|------|-----------|
-| `DESIGN_DOCS_PROJECT_PATH` | 対象プロジェクトのルートパス | カレントディレクトリ |
+| `BYEBYE_DOCS_PROJECT_PATH` | 対象プロジェクトのルートパス | カレントディレクトリ |
 
 ## 使用例
 

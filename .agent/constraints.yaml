@@ -113,7 +113,7 @@ roles:
   architect:
     permissions:
       read: [all]
-      write: [docs, design_docs]
+      write: [docs, agent_docs]
       propose: [architecture_changes]
     restrictions:
       - final_decision_by_human
