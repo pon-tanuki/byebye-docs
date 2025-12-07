@@ -165,6 +165,49 @@ git commit -m "feat: initialize project with AI-first development template"
 | `.md` | 説明文、ガイドライン、ドキュメント |
 | `.yaml` | 構造化データ、設定、スキーマ定義 |
 
+## MCPサーバー
+
+本テンプレートには、設計ドキュメントを操作するためのMCPサーバーが付属しています。Claude CodeやClaude Desktopと連携して、ドキュメントの作成・更新・検証を効率化できます。
+
+### インストール
+
+```bash
+cd mcp-server
+uv sync  # または pip install -e .
+```
+
+### Claude Codeでの設定
+
+プロジェクトルートに `.mcp.json` を作成：
+
+```json
+{
+  "mcpServers": {
+    "design-docs": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["--directory", "./mcp-server", "run", "design-docs-mcp"],
+      "env": {
+        "DESIGN_DOCS_PROJECT_PATH": "."
+      }
+    }
+  }
+}
+```
+
+### 主な機能
+
+| 種別 | 名前 | 説明 |
+|------|------|------|
+| Tool | `list_templates` | 利用可能なテンプレート一覧を取得 |
+| Tool | `create_document` | テンプレートから新規ドキュメントを作成 |
+| Tool | `validate_document` | ドキュメントの構造を検証 |
+| Tool | `update_section` | マーカーベースでセクションを更新 |
+| Prompt | `design-review` | 設計レビューワークフロー |
+| Prompt | `sync-with-code` | コードとの整合性チェック |
+
+詳細は [mcp-server/README.md](mcp-server/README.md) を参照してください。
+
 ## ライセンス
 
 MIT License
