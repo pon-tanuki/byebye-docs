@@ -388,7 +388,7 @@ commit:
 
 
 # Create MCP server
-server = Server("design-docs-mcp")
+server = Server("byebye-docs")
 
 
 @server.list_resources()

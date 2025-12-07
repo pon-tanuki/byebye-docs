@@ -1,9 +1,9 @@
-# 🤖 AI-First Development Template
+# 👋 byebye-docs
 
 **人間の皆さん、ようこそ！** ここはAIエージェントの楽園です。
 
 > 「人間が読みやすいドキュメント？そんなの捨てちまえ！」
-> — このテンプレートの設計思想
+> — byebye-docs の設計思想
 
 ## 🎯 What's This?
 
@@ -44,7 +44,7 @@ your-project/
 #### Step 1: クローンしてGit履歴を消す
 
 ```bash
-git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git my-awesome-project
+git clone https://github.com/pon-tanuki/byebye-docs.git my-awesome-project
 cd my-awesome-project
 rm -rf .git && git init
 ```
@@ -78,14 +78,14 @@ AI: *manifest.yaml を読む* → *必要なファイルだけ読む* → *実�
 
 ```bash
 # このリポジトリをクローン（一時的）
-git clone https://github.com/pon-tanuki/design-docs-for-ai-driven-development.git /tmp/ai-template
+git clone https://github.com/pon-tanuki/byebye-docs.git /tmp/byebye-docs
 
 # 既存プロジェクトに .agent/ と CLAUDE.md をコピー
-cp -r /tmp/ai-template/.agent /path/to/your-project/
-cp /tmp/ai-template/CLAUDE.md /path/to/your-project/
+cp -r /tmp/byebye-docs/.agent /path/to/your-project/
+cp /tmp/byebye-docs/CLAUDE.md /path/to/your-project/
 
 # お掃除
-rm -rf /tmp/ai-template
+rm -rf /tmp/byebye-docs
 ```
 
 #### Step 2: プロジェクトに合わせてYAMLを編集
@@ -116,7 +116,7 @@ echo ".agent/" >> .gitignore
 
 ```bash
 git add .agent/ CLAUDE.md
-git commit -m "feat: AI-First開発テンプレートを導入"
+git commit -m "feat: byebye-docsを導入"
 ```
 
 これで既存プロジェクトがAI効率特化に進化！🚀
@@ -187,10 +187,10 @@ uv sync
 ```json
 {
   "mcpServers": {
-    "design-docs": {
+    "byebye-docs": {
       "type": "stdio",
       "command": "uv",
-      "args": ["--directory", "./mcp-server", "run", "design-docs-mcp"]
+      "args": ["--directory", "./mcp-server", "run", "byebye-docs"]
     }
   }
 }

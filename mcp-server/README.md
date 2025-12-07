@@ -1,7 +1,7 @@
-# Design Docs MCP Server
+# byebye-docs MCP Server
 
-AIファースト開発のための設計ドキュメントテンプレートを操作するMCPサーバーです。
-Claude CodeやClaude Desktopと連携して、設計ドキュメントの作成・更新・検証をサポートします。
+byebye-docs用のMCPサーバーです。
+Claude CodeやClaude Desktopと連携して、`.agent/` ドキュメントの作成・更新・検証をサポートします。
 
 ## 機能
 
@@ -61,14 +61,14 @@ pip install -e .
 ```json
 {
   "mcpServers": {
-    "design-docs": {
+    "byebye-docs": {
       "type": "stdio",
       "command": "uv",
       "args": [
         "--directory",
         "./mcp-server",
         "run",
-        "design-docs-mcp"
+        "byebye-docs"
       ],
       "env": {
         "DESIGN_DOCS_PROJECT_PATH": "."

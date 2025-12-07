@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "design-docs-mcp"
+name = "byebye-docs"
 version = "0.1.0"
 description = "MCP server for AI-first development design document templates"
 readme = "README.md"
@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [
     { name = "Design Docs MCP Team" }
 ]
-keywords = ["mcp", "ai", "design-docs", "templates", "claude"]
+keywords = ["mcp", "ai", "byebye-docs", "templates", "claude"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -37,7 +37,7 @@ dev = [
 ]
 
 [project.scripts]
-design-docs-mcp = "design_docs_mcp:main"
+byebye-docs = "design_docs_mcp:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["design_docs_mcp"]
