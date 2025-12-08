@@ -1,20 +1,24 @@
-# インストールガイド
+# 🛠️ インストールガイド
 
-byebye-docsをプロジェクトに導入する方法を説明します。
+byebye-docsをプロジェクトに導入する方法。簡単だよ。
 
-## 方法1: 初期化スクリプト（推奨）
+## 🚀 方法1: ワンライナー（最速）
 
 ```bash
 curl -sL https://raw.githubusercontent.com/pon-tanuki/byebye-docs/main/scripts/init-project.sh | bash -s /path/to/your-project
 ```
 
-これで以下が自動的に行われます：
-1. MCPサーバー (`byebye-docs-mcp`) のインストール
-2. `.agent/` ディレクトリのコピー
-3. `CLAUDE.md` のコピー
-4. `.mcp.json` の作成
+これだけで：
+1. MCPサーバー (`byebye-docs-mcp`) インストール
+2. `.agent/` コピー
+3. `CLAUDE.md` コピー
+4. `.mcp.json` 作成
 
-## 方法2: 手動セットアップ
+全部やってくれる。楽ちん。
+
+## 🔧 方法2: 手動セットアップ
+
+ワンライナーが怖い人向け。
 
 ### Step 1: MCPサーバーをインストール
 
@@ -35,7 +39,7 @@ rm -rf /tmp/byebye-docs
 
 ### Step 3: MCP設定を作成
 
-プロジェクトルートに `.mcp.json` を作成：
+プロジェクトルートに `.mcp.json` を置く：
 
 ```json
 {
@@ -50,7 +54,9 @@ rm -rf /tmp/byebye-docs
 }
 ```
 
-## 方法3: リポジトリをクローン（新規プロジェクト）
+## 🆕 方法3: 新規プロジェクト
+
+ゼロから始める？こっち：
 
 ```bash
 git clone https://github.com/pon-tanuki/byebye-docs.git my-project
@@ -58,13 +64,18 @@ cd my-project
 rm -rf .git && git init
 ```
 
-## 次のステップ
+Git履歴消して、自分のプロジェクトとして使う。
 
-1. `.agent/` 配下のYAMLファイルをプロジェクトに合わせて編集
-2. Claude Code または Claude Desktop でMCPサーバーを有効化
-3. AIに「ユーザー認証機能を実装して」とか言ってみる
+## ✅ 次のステップ
 
-## MCPサーバーの更新
+1. `.agent/` 配下のYAMLを自分のプロジェクトに合わせて編集
+2. Claude Code または Claude Desktop 起動
+3. 「ユーザー認証機能を実装して」とか言ってみる
+4. AIがいい感じにやってくれる 🎉
+
+## 🔄 MCPサーバーの更新
+
+新機能が出たらこれで更新：
 
 ```bash
 pip install --upgrade byebye-docs-mcp
@@ -72,7 +83,9 @@ pip install --upgrade byebye-docs-mcp
 uv tool install byebye-docs-mcp --force
 ```
 
-## アンインストール
+## 🗑️ アンインストール
+
+やっぱいらないわ、って時：
 
 ```bash
 # MCPサーバーを削除
@@ -82,7 +95,7 @@ pip uninstall byebye-docs-mcp
 rm -rf .agent/ CLAUDE.md .mcp.json
 ```
 
-## サポート
+## 🆘 困ったら
 
-- [GitHub Issues](https://github.com/pon-tanuki/byebye-docs/issues)
-- [README.md](README.md)
+- [GitHub Issues](https://github.com/pon-tanuki/byebye-docs/issues) で報告
+- [README.md](README.md) を読む
