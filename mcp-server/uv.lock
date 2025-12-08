@@ -44,7 +44,7 @@ wheels = [
 ]
 
 [[package]]
-name = "byebye-docs"
+name = "byebye-docs-mcp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

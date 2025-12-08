@@ -589,7 +589,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "language": {
                         "type": "string",
-                        "enum": ["python", "auto"],
+                        "enum": ["python", "typescript", "auto"],
                         "description": "コードの言語（autoで自動検出）",
                         "default": "auto",
                     },
@@ -652,7 +652,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "language": {
                         "type": "string",
-                        "enum": ["python", "auto"],
+                        "enum": ["python", "typescript", "auto"],
                         "description": "コードの言語",
                         "default": "auto",
                     },
