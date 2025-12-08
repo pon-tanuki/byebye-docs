@@ -173,14 +173,19 @@ commit:
   types: [feat, fix, docs, refactor, test, chore]
 ```
 
-## 🔌 MCPサーバー（おまけ）
+## 🔌 MCPサーバー
 
 Claude CodeやClaude Desktopと連携できるMCPサーバー付き。
 
+### インストール
+
 ```bash
-cd mcp-server
-uv sync
+pip install byebye-docs-mcp
+# または
+uv tool install byebye-docs-mcp
 ```
+
+### 設定
 
 `.mcp.json` をプロジェクトルートに置いて：
 
@@ -188,13 +193,24 @@ uv sync
 {
   "mcpServers": {
     "byebye-docs": {
-      "type": "stdio",
-      "command": "uv",
-      "args": ["--directory", "./mcp-server", "run", "byebye-docs"]
+      "command": "byebye-docs",
+      "env": {
+        "BYEBYE_DOCS_PROJECT_PATH": "."
+      }
     }
   }
 }
 ```
+
+### 機能
+
+| ツール | 説明 |
+|--------|------|
+| `diff_code_docs` | コードとドキュメント間の差分を検出 |
+| `extract_from_code` | コードからAPI/エンティティ情報を抽出 |
+| `auto_sync` | コード変更をドキュメントに自動反映 |
+
+詳細は [mcp-server/README.md](mcp-server/README.md) を参照。
 
 ## 📜 旧ドキュメント
 
