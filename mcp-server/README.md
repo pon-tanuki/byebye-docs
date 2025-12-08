@@ -120,7 +120,7 @@ extract_from_code(
 )
 ```
 
-FastAPI のルートとか Pydantic のモデルとか、勝手に拾ってYAMLにしてくれる。
+FastAPI のルートとか Pydantic のモデルとか、Express のルートとか TypeORM のエンティティとか、勝手に拾ってYAMLにしてくれる。
 
 ### ドキュメントを自動同期
 
@@ -186,9 +186,15 @@ uv run ruff format .
 
 ## 🐍 対応言語（コード解析）
 
-現在 **Python** のみ対応：
+### Python
 - FastAPI / Flask のルート検出
 - SQLAlchemy / Pydantic / dataclass のエンティティ検出
+
+### TypeScript / JavaScript
+- Express.js / NestJS のルート検出
+- TypeORM のエンティティ検出
+- Prisma モデル（`.prisma` ファイル）
+- TypeScript interface / type alias
 
 他の言語？PRウェルカム。
 
