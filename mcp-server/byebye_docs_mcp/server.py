@@ -20,6 +20,10 @@ from mcp.types import (
     Tool,
 )
 
+from .core import DiffEngine, SyncManager
+from .extractors import ApiExtractor, EntityExtractor
+from .parsers import ParserRegistry
+
 # Template structure definition (AI-optimized flat structure)
 TEMPLATE_STRUCTURE = {
     ".agent": {
@@ -567,6 +571,95 @@ async def list_tools() -> list[Tool]:
                 "required": ["document_path"],
             },
         ),
+        Tool(
+            name="diff_code_docs",
+            description="コードとドキュメント間の差分を検出",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "code_path": {
+                        "type": "string",
+                        "description": "検査対象のコードパス（ディレクトリまたはファイル）",
+                    },
+                    "doc_type": {
+                        "type": "string",
+                        "enum": ["api", "entities", "all"],
+                        "description": "比較対象のドキュメントタイプ",
+                        "default": "all",
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": ["python", "auto"],
+                        "description": "コードの言語（autoで自動検出）",
+                        "default": "auto",
+                    },
+                },
+                "required": ["code_path"],
+            },
+        ),
+        Tool(
+            name="extract_from_code",
+            description="コードからドキュメント情報を抽出してYAML形式で出力",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "code_path": {
+                        "type": "string",
+                        "description": "抽出対象のコードパス",
+                    },
+                    "extract_type": {
+                        "type": "string",
+                        "enum": ["api", "entities", "all"],
+                        "description": "抽出する情報の種類",
+                        "default": "all",
+                    },
+                    "output_format": {
+                        "type": "string",
+                        "enum": ["yaml", "json"],
+                        "description": "出力形式",
+                        "default": "yaml",
+                    },
+                    "merge_with_existing": {
+                        "type": "boolean",
+                        "description": "既存ドキュメントとマージするか",
+                        "default": False,
+                    },
+                },
+                "required": ["code_path"],
+            },
+        ),
+        Tool(
+            name="auto_sync",
+            description="コード変更をドキュメントに自動反映（プレビュー/適用モード）",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "code_path": {
+                        "type": "string",
+                        "description": "スキャン対象のコードパス",
+                        "default": "src/",
+                    },
+                    "target_docs": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "対象ドキュメント（api.yaml, entities.yaml等）",
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["preview", "apply"],
+                        "description": "プレビューのみか実際に適用するか",
+                        "default": "preview",
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": ["python", "auto"],
+                        "description": "コードの言語",
+                        "default": "auto",
+                    },
+                },
+                "required": ["mode"],
+            },
+        ),
     ]
 
 
@@ -761,6 +854,87 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
             }, ensure_ascii=False),
         )]
 
+    elif name == "diff_code_docs":
+        code_path = arguments["code_path"]
+        doc_type = arguments.get("doc_type", "all")
+        language = arguments.get("language", "auto")
+
+        diff_engine = DiffEngine(project_root)
+        result = diff_engine.diff(code_path, doc_type, language)
+
+        return [TextContent(
+            type="text",
+            text=json.dumps(result.to_dict(), indent=2, ensure_ascii=False),
+        )]
+
+    elif name == "extract_from_code":
+        code_path = arguments["code_path"]
+        extract_type = arguments.get("extract_type", "all")
+        output_format = arguments.get("output_format", "yaml")
+        merge_with_existing = arguments.get("merge_with_existing", False)
+
+        diff_engine = DiffEngine(project_root)
+        code_elements, errors = diff_engine.get_code_elements(code_path)
+
+        if errors:
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "success": False,
+                    "errors": errors,
+                }, ensure_ascii=False),
+            )]
+
+        if code_elements is None:
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "success": False,
+                    "errors": ["Failed to parse code"],
+                }, ensure_ascii=False),
+            )]
+
+        result: dict[str, Any] = {"success": True, "extracted": {}}
+
+        # Extract API endpoints
+        if extract_type in ("api", "all"):
+            api_extractor = ApiExtractor(project_root)
+            api_path = project_root / ".agent" / "schemas" / "api.yaml"
+            existing_spec = api_extractor.load_existing_spec(api_path) if merge_with_existing else None
+            api_spec = api_extractor.extract_to_openapi(code_elements, existing_spec, merge_with_existing)
+            result["extracted"]["api"] = api_spec
+            if output_format == "yaml":
+                result["api_yaml"] = api_extractor.to_yaml(api_spec)
+
+        # Extract entities
+        if extract_type in ("entities", "all"):
+            entity_extractor = EntityExtractor(project_root)
+            entities_path = project_root / ".agent" / "schemas" / "entities.yaml"
+            existing_entities = entity_extractor.load_existing_entities(entities_path) if merge_with_existing else None
+            entities_spec = entity_extractor.extract_to_entities_yaml(code_elements, existing_entities, merge_with_existing)
+            result["extracted"]["entities"] = entities_spec
+            if output_format == "yaml":
+                result["entities_yaml"] = entity_extractor.to_yaml(entities_spec)
+
+        return [TextContent(
+            type="text",
+            text=json.dumps(result, indent=2, ensure_ascii=False),
+        )]
+
+    elif name == "auto_sync":
+        code_path = arguments.get("code_path", "src/")
+        target_docs = arguments.get("target_docs")
+        mode = arguments.get("mode", "preview")
+        language = arguments.get("language", "auto")
+
+        sync_manager = SyncManager(project_root)
+        result = sync_manager.sync(code_path, target_docs, mode, language)
+
+        return [TextContent(
+            type="text",
+            text=json.dumps(result.to_dict(), indent=2, ensure_ascii=False),
+        )]
+
     else:
         return [TextContent(
             type="text",
@@ -791,17 +965,6 @@ async def list_prompts() -> list[Prompt]:
                     name="change_description",
                     description="変更内容の説明",
                     required=True,
-                ),
-            ],
-        ),
-        Prompt(
-            name="sync-with-code",
-            description="コードとの整合性チェック",
-            arguments=[
-                PromptArgument(
-                    name="code_path",
-                    description="チェック対象のコードパス",
-                    required=False,
                 ),
             ],
         ),
@@ -882,47 +1045,6 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
    - .agent/schemas/entities.yaml との整合性を確認
 
 更新後、変更サマリを報告してください。
-""",
-                    ),
-                ),
-            ],
-        )
-
-    elif name == "sync-with-code":
-        code_path = arguments.get("code_path", "src/") if arguments else "src/"
-        return GetPromptResult(
-            messages=[
-                PromptMessage(
-                    role="user",
-                    content=TextContent(
-                        type="text",
-                        text=f"""コードとドキュメントの整合性をチェックします。
-
-対象コードパス: {code_path}
-
-以下の観点でチェックしてください：
-
-1. **API整合性**
-   - .agent/schemas/api.yaml と実装コードの比較
-   - エンドポイント、パラメータ、レスポンス型の一致確認
-
-2. **データモデル整合性**
-   - .agent/schemas/entities.yaml と実装の比較
-   - エンティティ定義、フィールド、型の一致確認
-
-3. **アーキテクチャ整合性**
-   - .agent/architecture.yaml と実装の比較
-   - コンポーネント構成の一致確認
-
-4. **不整合の報告**
-   - 発見した不整合を一覧化
-   - 修正が必要な箇所を特定
-
-5. **修正提案**
-   - ドキュメント側の修正案
-   - またはコード側の修正案
-
-整合性チェック結果を報告してください。
 """,
                     ),
                 ),

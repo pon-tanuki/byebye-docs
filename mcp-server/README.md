@@ -1,7 +1,64 @@
 # byebye-docs MCP Server
 
+[![PyPI version](https://badge.fury.io/py/byebye-docs-mcp.svg)](https://badge.fury.io/py/byebye-docs-mcp)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 byebye-docs用のMCPサーバーです。
-Claude CodeやClaude Desktopと連携して、`.agent/` ドキュメントの作成・更新・検証をサポートします。
+Claude CodeやClaude Desktopと連携して、`.agent/` ドキュメントの作成・更新・検証、およびコードとドキュメントの双方向同期をサポートします。
+
+## インストール
+
+### PyPIからインストール（推奨）
+
+```bash
+pip install byebye-docs-mcp
+```
+
+または uv を使用:
+
+```bash
+uv tool install byebye-docs-mcp
+```
+
+### プロジェクトへの適用
+
+初期化スクリプトを使用して、既存プロジェクトにbyebye-docsを適用:
+
+```bash
+curl -sL https://raw.githubusercontent.com/pon-tanuki/byebye-docs/main/scripts/init-project.sh | bash -s /path/to/your-project
+```
+
+または手動で:
+
+```bash
+# 1. MCPサーバーをインストール
+pip install byebye-docs-mcp
+
+# 2. テンプレートをコピー（GitHubから）
+git clone --depth 1 https://github.com/pon-tanuki/byebye-docs.git /tmp/byebye-docs
+cp -r /tmp/byebye-docs/.agent /path/to/your-project/
+cp /tmp/byebye-docs/CLAUDE.md /path/to/your-project/
+
+# 3. .mcp.json を作成（下記参照）
+```
+
+## Claude Codeでの設定
+
+プロジェクトルートに `.mcp.json` を作成:
+
+```json
+{
+  "mcpServers": {
+    "byebye-docs": {
+      "command": "byebye-docs",
+      "env": {
+        "BYEBYE_DOCS_PROJECT_PATH": "."
+      }
+    }
+  }
+}
+```
 
 ## 機能
 
@@ -9,12 +66,14 @@ Claude CodeやClaude Desktopと連携して、`.agent/` ドキュメントの作
 
 | URI | 説明 |
 |-----|------|
-| `template://structure` | テンプレートの構造情報（どのセクションがあるか、必須項目は何か） |
+| `template://structure` | テンプレートの構造情報 |
 | `template://schema` | 各ドキュメントの検証スキーマ |
 | `project://current` | 現在のプロジェクト情報 |
 | `docs://list` | プロジェクト内の既存ドキュメント一覧 |
 
 ### Tools（ツール）
+
+#### ドキュメント管理
 
 | ツール名 | 説明 |
 |---------|------|
@@ -25,79 +84,60 @@ Claude CodeやClaude Desktopと連携して、`.agent/` ドキュメントの作
 | `validate_document` | ドキュメントが規定の構造に従っているか検証 |
 | `fill_metadata` | プロジェクト情報からメタデータを自動入力 |
 
+#### コード↔ドキュメント同期
+
+| ツール名 | 説明 |
+|---------|------|
+| `diff_code_docs` | コードとドキュメント間の差分を検出 |
+| `extract_from_code` | コードからAPI/エンティティ情報を抽出しYAML出力 |
+| `auto_sync` | コード変更をドキュメントに自動反映（preview/apply） |
+
 ### Prompts（プロンプト）
 
 | プロンプト名 | 説明 |
 |-------------|------|
 | `design-review` | 設計レビュー用のワークフロー |
 | `update-architecture` | アーキテクチャ図更新のガイド |
-| `sync-with-code` | コードとの整合性チェック |
-
-## インストール
-
-### 前提条件
-
-- Python 3.10以上
-- uv（推奨）または pip
-
-### uvを使用する場合
-
-```bash
-cd mcp-server
-uv sync
-```
-
-### pipを使用する場合
-
-```bash
-cd mcp-server
-pip install -e .
-```
-
-## Claude Codeでの設定
-
-`claude_desktop_config.json`（または同等の設定ファイル）に以下を追加:
-
-```json
-{
-  "mcpServers": {
-    "byebye-docs": {
-      "type": "stdio",
-      "command": "uv",
-      "args": [
-        "--directory",
-        "./mcp-server",
-        "run",
-        "byebye-docs"
-      ],
-      "env": {
-        "BYEBYE_DOCS_PROJECT_PATH": "."
-      }
-    }
-  }
-}
-```
-
-### 環境変数
-
-| 変数名 | 説明 | デフォルト |
-|--------|------|-----------|
-| `BYEBYE_DOCS_PROJECT_PATH` | 対象プロジェクトのルートパス | カレントディレクトリ |
 
 ## 使用例
 
-### テンプレート一覧の取得
+### コードとドキュメントの差分検出
 
-```
-list_templates(category="product")
+```python
+diff_code_docs(
+    code_path="src/",
+    doc_type="all",  # "api", "entities", "all"
+    language="auto"
+)
 ```
 
-### 新規ドキュメントの作成
+### コードからドキュメント情報を抽出
 
+```python
+extract_from_code(
+    code_path="src/",
+    extract_type="all",  # "api", "entities", "all"
+    output_format="yaml",
+    merge_with_existing=True
+)
 ```
+
+### ドキュメントの自動同期
+
+```python
+# プレビュー（変更内容を確認）
+auto_sync(mode="preview", code_path="src/")
+
+# 適用（実際にドキュメントを更新）
+auto_sync(mode="apply", code_path="src/", target_docs=["api.yaml", "entities.yaml"])
+```
+
+### テンプレートからドキュメント作成
+
+```python
 create_document(
-    template_type="vision.md",
-    output_path="docs/product/vision.md",
+    template_type="context.yaml",
+    output_path=".agent/context.yaml",
     metadata={
         "project_name": "My Project",
         "author": "Claude Agent"
@@ -105,82 +145,46 @@ create_document(
 )
 ```
 
-### ドキュメントの検証
+## 更新方法
 
-```
-validate_document(document_path="docs/product/requirements.yaml")
-```
-
-### セクションの更新
-
-マーカーを使用したセクション更新:
-
-```markdown
-<!-- AI_EDITABLE_START: features -->
-現在の機能一覧
-<!-- AI_EDITABLE_END: features -->
+```bash
+pip install --upgrade byebye-docs-mcp
+# または
+uv tool install byebye-docs-mcp --force
 ```
 
-```
-update_section(
-    document_path="docs/product/vision.md",
-    section_name="features",
-    new_content="新しい機能一覧の内容"
-)
-```
+## 環境変数
+
+| 変数名 | 説明 | デフォルト |
+|--------|------|-----------|
+| `BYEBYE_DOCS_PROJECT_PATH` | 対象プロジェクトのルートパス | カレントディレクトリ |
 
 ## 開発
+
+### ソースからインストール
+
+```bash
+git clone https://github.com/pon-tanuki/byebye-docs.git
+cd byebye-docs/mcp-server
+uv sync
+```
 
 ### テストの実行
 
 ```bash
-cd mcp-server
 uv run pytest
 ```
 
 ### Lintの実行
 
 ```bash
-cd mcp-server
 uv run ruff check .
 uv run ruff format .
 ```
 
-## 対応テンプレート
+## 対応言語（コード解析）
 
-### Product（プロダクト）
-
-- `vision.md` - プロダクトビジョン（必須）
-- `requirements.yaml` - 機能要件定義（必須）
-- `nonfunctional_requirements.yaml` - 非機能要件
-- `user_scenarios.md` - ユーザーシナリオ
-
-### Architecture（アーキテクチャ）
-
-- `system_overview.md` - システム概要（必須）
-- `domain_model.md` - ドメインモデル
-- `sequence_diagrams.md` - シーケンス図
-- `api_design/openapi.yaml` - API設計
-- `data_schemas/entities.yaml` - エンティティ定義
-
-### Agent（エージェント）
-
-- `roles.yaml` - 役割定義（必須）
-- `constraints.yaml` - 制約条件（必須）
-- `behaviours.md` - 行動規則
-- `tools/available_tools.md` - 利用可能ツール
-
-### Dev Process（開発プロセス）
-
-- `coding_standards.md` - コーディング規約（必須）
-- `branch_strategy.md` - ブランチ戦略
-- `review_guidelines.md` - レビューガイドライン
-
-### Ops（運用）
-
-- `ci_cd_pipeline.md` - CI/CDパイプライン
-- `monitoring_plan.md` - 監視計画
-- `logs_schema.yaml` - ログスキーマ
+- **Python** - FastAPI, Flask, SQLAlchemy, Pydantic, dataclass
 
 ## ライセンス
 
