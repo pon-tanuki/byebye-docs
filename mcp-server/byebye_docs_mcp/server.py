@@ -386,6 +386,70 @@ commit:
   format: "<type>(<scope>): <subject>"
   types: [feat, fix, docs, refactor, test, chore]
 """,
+        "schemas/api.yaml": """openapi: 3.0.3
+info:
+  title: "[PROJECT_NAME] API"
+  description: API definition
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/v1
+    description: Development server
+
+paths:
+  /example:
+    get:
+      summary: Example endpoint
+      operationId: getExample
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+""",
+        "schemas/entities.yaml": """version: "1.0"
+last_updated: "[DATE]"
+
+entities:
+  - schema: "[EntityName]"
+    description: "[Description]"
+    table_name: "[table_name]"
+    fields:
+      - name: id
+        type: uuid
+        primary_key: true
+        auto_generate: true
+        description: "Primary key"
+
+      - name: created_at
+        type: datetime
+        auto_now_add: true
+        nullable: false
+
+      - name: updated_at
+        type: datetime
+        auto_now: true
+        nullable: false
+
+    indexes:
+      - fields: [id]
+        unique: true
+""",
     }
 
     return templates.get(doc_type)
